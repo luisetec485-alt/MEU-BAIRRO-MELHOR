@@ -1,34 +1,44 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Meu Bairro Melhor</title>
+    <link rel="stylesheet" href="../view/css/style.css">
 </head>
 <body>
+
 <div class="fixed-logo">
-    <img src="logo.png" alt="Logo Meu Bairro Melhor">
+    <img src="img/logo.png" alt="Logo Meu Bairro Melhor">
 </div>
-<section class="screen" id="home">
-    <div class="content-box">
-        <h1 class="main-title">Login</h1><br><br>
 
-        <form method="POST" action="../controller/routes.php?acao=login">
-            <label>Email:</label>
-            <input type="email" name="email" required><br><br>
+<section class="screen">
+    <div class="dashboard-container max-width-small">
+        <div class="welcome-box">
+            <h2>Login</h2>
+            <p>Acesse sua conta para continuar.</p>
 
-            <label>Senha:</label>
-            <input type="password" name="senha" required><br>
+            <form method="POST" action="../controller/routes.php?acao=login" class="form-moderno">
+                
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
 
-            <br><br>
-            <button type="submit" class="btn btn-green">Entrar</button>
-        </form>
-        <br><br>
+                <div class="form-group">
+                    <label for="senha">Senha:</label>
+                    <input type="password" id="senha" name="senha" required>
+                </div>
 
-        <a href="cadastro.php" style="display: inline-block;margin-top: 15px;font-size: 14px;color: #5A2E1C;text-decoration: none;border-bottom: 1px solid transparent;transition: 0.3s;" onmouseover="this.style.borderBottom='1px solid #5A2E1C'" onmouseout="this.style.borderBottom='1px solid transparent'">
-            Não tem conta? Cadastre-se
-        </a>
+                <button type="submit" class="btn-green btn-block">Entrar</button>
+            </form>
+
+            <a href="cadastro.php" class="btn-secondary btn-block">Não tem conta? Cadastre-se</a>
+
+        </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 </html>

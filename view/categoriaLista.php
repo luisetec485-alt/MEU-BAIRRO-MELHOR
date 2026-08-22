@@ -1,41 +1,59 @@
-<?php session_start(); ?>
+<?php
+session_start();
+
+if(!isset($_SESSION['id'])){
+    header("Location: login.php");
+    exit;
+}
+?>
 
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Categorias</title>
-
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../view/css/style.css">
 </head>
 <body>
 
-<div class="content-box">
-
-    <h2>Categorias</h2>
-
-    <table border="1" width="100%">
-
-        <tr>
-            <th>ID</th>
-            <th>Categoria</th>
-        </tr>
-
-        <?php foreach($categorias as $c): ?>
-
-        <tr>
-            <td><?= $c['id'] ?></td>
-
-            <td>
-                <?= htmlspecialchars($c['nome']) ?>
-            </td>
-        </tr>
-
-        <?php endforeach; ?>
-
-    </table>
-
+<div class="fixed-logo">
+    <img src="img/logo.png" alt="Logo Meu Bairro Melhor">
 </div>
+
+<section class="screen">
+    <div class="dashboard-container max-width-large">
+        <div class="welcome-box">
+
+            <h2>Categorias</h2>
+            <p>Categorias cadastradas no sistema.</p>
+
+            <div class="table-responsive">
+                <table class="tabela-dados">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Categoria</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach($categorias as $c): ?>
+                        <tr>
+                            <td>#<?= $c['id'] ?></td>
+                            <td><?= htmlspecialchars($c['nome']) ?></td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <a href="../view/dashboard.php" class="btn-secondary btn-block">
+                Voltar
+            </a>
+
+        </div>
+    </div>
+</section>
 
 </body>
 </html>

@@ -4,22 +4,20 @@ require_once 'Conexao.php';
 
 class SubcategoriaModel {
 
-    // inserir subcategoria
-    public function inserir($nome, $categoriaId) {
+    public function inserir($nome, $categoriaid) {
 
         $conexao = Conexao::getConexao();
 
         $stmt = $conexao->prepare(
-            "INSERT INTO subcategorias(nome, categoriaId)
+            "INSERT INTO subcategorias(nome, categoriaid)
              VALUES(?, ?)"
         );
 
-        $stmt->execute([$nome, $categoriaId]);
+        $stmt->execute([$nome, $categoriaid]);
 
         return "ok";
     }
 
-    // listar subcategorias com nome da categoria
     public function listarTodos() {
 
         $conexao = Conexao::getConexao();
@@ -30,7 +28,7 @@ class SubcategoriaModel {
                 c.nome AS categoriaNome
              FROM subcategorias s
              INNER JOIN categorias c
-                ON s.categoriaId = c.id
+                ON s.categoriaid = c.id
              ORDER BY s.nome ASC"
         );
 
@@ -39,24 +37,22 @@ class SubcategoriaModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // buscar subcategorias por categoria (para selects dinâmicos)
-    public function buscarPorCategoria($categoriaId) {
+    public function buscarPorCategoria($categoriaid) {
 
         $conexao = Conexao::getConexao();
 
         $stmt = $conexao->prepare(
             "SELECT *
              FROM subcategorias
-             WHERE categoriaId = ?
+             WHERE categoriaid = ?
              ORDER BY nome ASC"
         );
 
-        $stmt->execute([$categoriaId]);
+        $stmt->execute([$categoriaid]);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // buscar subcategoria por id
     public function buscarPorId($id) {
 
         $conexao = Conexao::getConexao();

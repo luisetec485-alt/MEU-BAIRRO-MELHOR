@@ -3,14 +3,11 @@ require_once '../model/UsuarioModel.php';
 
 class UsuarioController {
     
-    // função de cadastro
     public function cadastrar() {   
-        // pega os dados
         $nome = $_POST['nome'] ?? '';
         $email = strtolower(trim($_POST['email'] ?? ''));
         $senha = $_POST['senha'] ?? '';
 
-        // validação para email com o formato certo (luis@gmail.com)
         if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
             echo '
                 <!DOCTYPE html>
@@ -35,7 +32,6 @@ class UsuarioController {
             return;
         }
 
-        // validação para nome com até 50 caracteres
         if(strlen($nome) > 50){
             echo '
                 <!DOCTYPE html>
@@ -60,7 +56,6 @@ class UsuarioController {
             return;
         }
 
-        // validação para valor vazio
         if(empty($nome) || empty($email) || empty($senha)) {
             echo '
                 <!DOCTYPE html>
@@ -85,7 +80,6 @@ class UsuarioController {
             return;
         }
 
-        // validação para senha com no minimo 8 caracteres
         if(strlen($senha) < 8){
             echo '
                 <!DOCTYPE html>
@@ -109,7 +103,6 @@ class UsuarioController {
             return;
         }
 
-        // Validação para senha com apenas números e sem espaços
 if (!preg_match('/^\d+$/', $senha)) {
     echo '
         <!DOCTYPE html>
@@ -133,7 +126,6 @@ if (!preg_match('/^\d+$/', $senha)) {
     return;
 }
 
-        // validação para senha com no maximo 255 caracteres
         if(strlen($senha) > 255){
             echo '
                 <!DOCTYPE html>
@@ -157,7 +149,6 @@ if (!preg_match('/^\d+$/', $senha)) {
             return;
         }       
 
-        // criptografia da senha
         $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
 
         $model = new UsuarioModel();
@@ -208,12 +199,11 @@ if (!preg_match('/^\d+$/', $senha)) {
         }
     }
 
-    // função de login
     public function login() {
         $email = strtolower(trim($_POST['email'] ?? ''));
         $senha = $_POST['senha'] ?? '';
-        
-        if(empty($email) || empty($senha)) {
+
+        if(empty($email) || empty($senha)){
             echo '
                 <!DOCTYPE html>
                 <html>
@@ -236,47 +226,26 @@ if (!preg_match('/^\d+$/', $senha)) {
             return;
         }
 
-        // validação para email com o formato certo (luis@gmail.com)
-        if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-            echo '
-                <!DOCTYPE html>
-                <html>
-                <head>
-                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                </head>
-                <body>
-                <script>
-                Swal.fire({
-                    title: "Erro!",
-                    text: "Formato de email errado!",
-                    icon: "error"
-                }).then(() => {
-                    window.history.back();
-                });
-                </script>
-                </body>
-                </html>
-            ';
-            return;
-        }
-        
         $model = new UsuarioModel();
-        $usuario = $model->login($email, $senha);
-        
-        // validar o login, criar a sessão do usuário e liberar acesso ao sistema
-        if (!empty($usuario)) {
+        $conexao = Conexao::getConexao();
 
-            session_start();
+        $stmt = $conexao->prepare("SELECT * FROM login WHERE Email = ?");
+        $stmt->execute([$email]);
 
-            // SEGURANÇA
-            session_regenerate_id(true);
+        $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            $_SESSION['id'] = $usuario[0]['idUsuario'];
-            $_SESSION['nome'] = $usuario[0]['nomeUsuario'];
+        if ($resultado && password_verify($senha, $resultado['Senha'])) {
             
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+
+            $_SESSION['id'] = $resultado['idUsuario'];
+            $_SESSION['nomeUsuario'] = $resultado['nomeUsuario'];
+            $_SESSION['foto'] = $resultado['foto'];
+
             header("Location: ../view/dashboard.php");
             exit;
-
         } else {
             echo '
                 <!DOCTYPE html>
@@ -289,10 +258,9 @@ if (!preg_match('/^\d+$/', $senha)) {
                 Swal.fire({
                     title: "Erro!",
                     text: "Email ou Senha incorretos!",
-                    icon: "error",
-                    confirmButtonText: "Tentar Novamente"
+                    icon: "error"
                 }).then(() => {
-                    window.location.href = "../view/login.php";
+                    window.history.back();
                 });
                 </script>
                 </body>
@@ -301,7 +269,45 @@ if (!preg_match('/^\d+$/', $senha)) {
         }
     }
 
-    // função de editar
+    public function uploadFoto() {
+        session_start();
+        if (isset($_SESSION['id']) && isset($_FILES['foto'])) {
+            $idUsuario = $_SESSION['id'];
+            
+            $extensao = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+            $extesoesPermitidas = ['jpg', 'jpeg', 'png'];
+    
+            if (in_array($extensao, $extesoesPermitidas)) {
+                $nomeFoto = uniqid() . "." . $extensao;
+                $diretorioDestino = __DIR__ . "/../view/img/" . $nomeFoto;
+                if (move_uploaded_file($_FILES['foto']['tmp_name'], $diretorioDestino)) {
+                    $caminhoBanco = "img/" . $nomeFoto;
+                    $conexao = Conexao::getConexao();
+                    $stmt = $conexao->prepare("UPDATE login SET foto = ? WHERE idUsuario = ?");
+                    $resultado = $stmt->execute([$caminhoBanco, $idUsuario]);
+                    if ($resultado) {
+                        $_SESSION['foto'] = $caminhoBanco;
+                        echo "
+                        <script>
+                            alert('Foto de perfil atualizada com sucesso!');
+                            window.location.href = '../view/dashboard.php';
+                        </script>
+                        ";
+                        exit;
+                    } else {
+                        echo "<script>alert('Erro ao salvar o caminho da foto no banco de dados.'); history.back();</script>";
+                    }
+                } else {
+                    echo "<script>alert('Erro ao mover o arquivo para a pasta view/img/.'); history.back();</script>";
+                }
+            } else {
+                echo "<script>alert('Extensão não permitida! Use apenas PNG, JPG ou JPEG.'); window.history.back();</script>";
+            }
+        } else {
+            echo "<script>alert('Sessão expirada ou nenhum arquivo enviado.'); window.location.href = '../view/login.php';</script>";
+        }
+    }
+
     public function mostrarEditar() {
         session_start();
 
@@ -318,7 +324,6 @@ if (!preg_match('/^\d+$/', $senha)) {
         require_once '../view/editar.php';
     }
 
-    // função de atualizar
     public function atualizar() {
         session_start();
         $id = $_SESSION['id'];
@@ -373,8 +378,6 @@ if (!preg_match('/^\d+$/', $senha)) {
         }
         
         $model = new UsuarioModel();
-        
-        // hash ANTES de mandar pro model, pra deixar a senha criptografada
         if(!empty($senha)){
             $senha = password_hash($senha, PASSWORD_DEFAULT);
             $model->atualizar($id, $nome, $email, $senha);
@@ -384,7 +387,6 @@ if (!preg_match('/^\d+$/', $senha)) {
         
         session_start();
         $_SESSION['nome'] = $nome;
-        
         echo '
             <!DOCTYPE html>
             <html>
@@ -406,17 +408,13 @@ if (!preg_match('/^\d+$/', $senha)) {
         ';
     }
 
-    // função de excluir
     public function excluir() {
         session_start();
         $id = $_SESSION['id'];
-        
         $model = new UsuarioModel();
         $model->excluir($id);
-        
         session_start();
         session_destroy();
-        
         echo '
             <!DOCTYPE html>
             <html>
@@ -437,8 +435,7 @@ if (!preg_match('/^\d+$/', $senha)) {
             </html>
         ';
     }
-    
-    // função de logout (para sair da conta)
+
     public function logout() {
         session_start();
         session_destroy();

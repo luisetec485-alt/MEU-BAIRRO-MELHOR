@@ -1,29 +1,37 @@
 <?php
 
-require_once '../model/ProblemaModel.php';
+require_once __DIR__.'/../model/ProblemaModel.php';
+require_once __DIR__.'/../model/CategoriaModel.php';
+require_once __DIR__.'/../model/SubcategoriaModel.php';
 
 class ProblemaController {
 
-    // listar problemas
-    public function listar() {
+    public function abrirFormulario() {
 
-        $model = new ProblemaModel();
+        $categoriaModel = new CategoriaModel();
+        $subcategoriaModel = new SubcategoriaModel();
 
-        $busca = $_GET['busca'] ?? '';
+        $categorias = $categoriaModel->listarTodos();
+        $subcategorias = $subcategoriaModel->listarTodos();
 
-        if(!empty($busca)) {
-
-            $problemas = $model->buscar($busca);
-
-        } else {
-
-            $problemas = $model->listarTodos();
-        }
-
-        require_once '../view/problemaLista.php';
+        require_once '../view/problemaForm.php';
     }
 
-    // salvar problema
+    public function listar() {
+
+        $problemaModel = new ProblemaModel();
+
+        $problemas = $problemaModel->listarTodos();
+
+        $categoriaModel = new CategoriaModel();
+        $subcategoriaModel = new SubcategoriaModel();
+
+        $categorias = $categoriaModel->listarTodos();
+        $subcategorias = $subcategoriaModel->listarTodos();
+
+        require_once __DIR__.'/../view/problemaLista.php';
+    }
+
     public function salvar() {
 
         session_start();
@@ -31,15 +39,15 @@ class ProblemaController {
         $titulo = $_POST['titulo'] ?? '';
         $descricao = $_POST['descricao'] ?? '';
         $imagem = $_POST['imagem'] ?? '';
-        $categoriaId = $_POST['categoriaId'] ?? '';
-        $subcategoriaId = $_POST['subcategoriaId'] ?? '';
+        $categoriaid = $_POST['categoriaid'] ?? '';
+        $subcategoriaid = $_POST['subcategoriaid'] ?? '';
         $usuarioId = $_SESSION['id'];
 
         if(
             empty($titulo) ||
             empty($descricao) ||
-            empty($categoriaId) ||
-            empty($subcategoriaId)
+            empty($categoriaid) ||
+            empty($subcategoriaid)
         ) {
 
             echo "Preencha todos os campos.";
@@ -52,8 +60,8 @@ class ProblemaController {
             $titulo,
             $descricao,
             $imagem,
-            $categoriaId,
-            $subcategoriaId,
+            $categoriaid,
+            $subcategoriaid,
             $usuarioId
         );
 

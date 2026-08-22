@@ -7,70 +7,163 @@ if(!isset($_SESSION['id'])){
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Problemas Registrados - Meu Bairro Melhor</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<div class="fixed-logo">
-    <img src="logo.png" alt="Logo Meu Bairro Melhor">
-</div>
+<?php include 'header.php'; ?>
 
 <section class="screen">
-    <div class="content-box" style="max-width: 1200px;">
-        <h2>Problemas Registrados</h2>
+    <div class="dashboard-container max-width-large">
 
-        <!-- BUSCA -->
-        <form method="GET" action="../controller/routes.php">
-            <input type="hidden" name="acao" value="listarProblemas">
-            <input type="text" name="busca" placeholder="Pesquisar problema..." 
-                   value="<?= isset($_GET['busca']) ? htmlspecialchars($_GET['busca']) : '' ?>">
-            <button type="submit" class="btn btn-green">Buscar</button>
-        </form>
+        <div class="welcome-box">
 
-        <br>
+            <h2>Problemas Registrados</h2>
 
-        <table class="tabela-dados">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Título</th>
-                    <th>Categoria</th>
-                    <th>Subcategoria</th>
-                    <th>Usuário</th>
-                    <th>Data</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if(isset($problemas) && !empty($problemas)): ?>
-                    <?php foreach($problemas as $p): ?>
-                    <tr>
-                        <td><?= $p['id'] ?></td>
-                        <td><?= htmlspecialchars($p['titulo']) ?></td>
-                        <td><?= htmlspecialchars($p['categoriaNome']) ?></td>
-                        <td><?= htmlspecialchars($p['subcategoriaNome']) ?></td>
-                        <td><?= htmlspecialchars($p['nomeUsuario']) ?></td>
-                        <td><?= date('d/m/Y H:i', strtotime($p['dataProblema'])) ?></td>
-                    </tr>
+            <p>
+                Acompanhe e pesquise os problemas relatados na comunidade.
+            </p>
+
+            <div class="filtros-container">
+
+                <input
+                    type="text"
+                    id="campoBusca"
+                    placeholder="Buscar problema..."
+                    onkeyup="buscarProblemas()"
+                >
+
+                <select
+                    id="filtroCategoria"
+                    onchange="filtrarCategoria()"
+                >
+                    <option value="">
+                        Todas as Categorias
+                    </option>
+
+                    <?php foreach($categorias as $c): ?>
+
+                        <option value="<?= $c['id'] ?>">
+                            <?= htmlspecialchars($c['nome']) ?>
+                        </option>
+
                     <?php endforeach; ?>
-                <?php else: ?>
-                    <tr>
-                        <td colspan="6" style="text-align: center;">
-                            Nenhum problema cadastrado ainda.
-                        </td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
 
-        <br>
-        <a href="../view/dashboard.php" class="back-link">← Voltar ao Dashboard</a>
+                </select>
+
+                <select
+                    id="filtroSubcategoria"
+                    onchange="filtrarSubcategoria()"
+                >
+                    <option value="">
+                        Todas as Subcategorias
+                    </option>
+
+                    <?php foreach($subcategorias as $s): ?>
+
+                        <option value="<?= $s['id'] ?>">
+                            <?= htmlspecialchars($s['nome']) ?>
+                        </option>
+
+                    <?php endforeach; ?>
+
+                </select>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="tabela-dados">
+
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Título</th>
+                            <th>Categoria</th>
+                            <th>Subcategoria</th>
+                            <th>Usuário</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <?php if(isset($problemas) && !empty($problemas)): ?>
+
+                            <?php foreach($problemas as $p): ?>
+
+                                <tr
+                                    class="linha-problema"
+
+                                    data-titulo="<?= strtolower($p['titulo']) ?>"
+
+                                    data-categoria="<?= htmlspecialchars($p['categoriaNome']) ?>"
+
+                                    data-subcategoria="<?= htmlspecialchars($p['subcategoriaNome']) ?>"
+
+                                    data-usuario="<?= htmlspecialchars($p['nomeUsuario']) ?>"
+
+                                    data-categoriaid="<?= $p['categoriaid'] ?>"
+
+                                    data-subcategoriaid="<?= $p['subcategoriaid'] ?>"
+                                >
+
+                                    <td>#<?= $p['id'] ?></td>
+
+                                    <td>
+                                        <strong>
+                                            <?= htmlspecialchars($p['titulo']) ?>
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        <span class="badge badge-gray">
+                                            <?= htmlspecialchars($p['categoriaNome']) ?>
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($p['subcategoriaNome']) ?>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($p['nomeUsuario']) ?>
+                                    </td>
+
+                                    <td>
+                                        <?= date('d/m/Y H:i', strtotime($p['dataproblema'])) ?>
+                                    </td>
+
+                                </tr>
+
+                            <?php endforeach; ?>
+
+                        <?php else: ?>
+
+                            <tr>
+                                <td
+                                    colspan="6"
+                                    class="text-center text-muted"
+                                    style="padding:30px;"
+                                >
+                                    Nenhum problema encontrado.
+                                </td>
+                            </tr>
+
+                        <?php endif; ?>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <a
+                href="../view/dashboard.php"
+                class="btn-secondary btn-block"
+            >
+                Voltar ao Dashboard
+            </a>
+
+        </div>
+
     </div>
 </section>
 
-</body>
-</html>
+<?php include 'footer.php'; ?>

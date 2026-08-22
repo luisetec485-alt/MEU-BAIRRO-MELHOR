@@ -2,137 +2,70 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Usuário - Meu Bairro Melhor</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        /* Estilos específicos para a página de edição */
-        .box {
-            background: rgba(242, 232, 213, 0.95);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            width: 100%;
-            max-width: 500px;
-            margin: 20px;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .box h2 {
-            text-align: center;
-            margin-bottom: 30px;
-            color: #1F4D36;
-        }
-
-        .box label {
-            display: block;
-            margin-top: 15px;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #1F4D36;
-        }
-
-        .box input[type="text"],
-        .box input[type="email"],
-        .box input[type="password"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-        }
-
-        .box input:focus {
-            border-color: #E48C2A;
-            outline: none;
-        }
-
-        .btn-salvar {
-            width: 100%;
-            padding: 14px;
-            margin-top: 20px;
-            background-color: #3E7C47;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn-salvar:hover {
-            transform: scale(1.02);
-            filter: brightness(1.05);
-        }
-
-        .btn-excluir {
-            width: 100%;
-            padding: 14px;
-            margin-top: 15px;
-            background-color: #D64545;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-family: 'Poppins', sans-serif;
-            font-weight: 600;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn-excluir:hover {
-            transform: scale(1.02);
-            filter: brightness(1.05);
-        }
-
-        .btn-voltar {
-            display: block;
-            text-align: center;
-            margin-top: 20px;
-            color: #5A2E1C;
-            text-decoration: none;
-            font-size: 14px;
-        }
-
-        .btn-voltar:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <link rel="stylesheet" href="../view/css/style.css">
 </head>
 <body>
 
 <div class="fixed-logo">
-    <img src="logo.png" alt="Logo Meu Bairro Melhor">
+    <img src="../view/img/logo.png" alt="Logo Meu Bairro Melhor">
 </div>
 
 <section class="screen">
-    <div class="box">
-        <h2>Editar Dados</h2>
+    <div class="dashboard-container max-width-small">
+        <div class="welcome-box">
+            <h2>Editar Dados</h2>
+            <p>Mantenha suas informações de perfil atualizadas.</p>
 
-        <form method="POST" action="../controller/routes.php?acao=atualizar">
-            <input type="hidden" name="id" value="<?php echo $usuario['idUsuario']; ?>">
+            <form method="POST" action="../controller/routes.php?acao=atualizar" class="form-moderno">
+                <input type="hidden" name="id" value="<?php echo $usuario['idUsuario']; ?>">
 
-            <label>Nome:</label>
-            <input type="text" name="nome" value="<?php echo htmlspecialchars($usuario['nomeUsuario']); ?>" required>
+                <div class="form-group">
+                    <label for="nome">Nome:</label>
+                    <input type="text" id="nome" name="nome" value="<?php echo htmlspecialchars($usuario['nomeUsuario']); ?>" required>
+                </div>
 
-            <label>Email:</label>
-            <input type="email" name="email" value="<?php echo htmlspecialchars($usuario['Email']); ?>" required>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($usuario['Email']); ?>" required>
+                </div>
 
-            <label>Nova Senha:</label>
-            <input type="password" name="senha" placeholder="Deixe em branco para manter">
+                <div class="form-group">
+                    <label for="senha">Nova Senha:</label>
+                    <input type="password" id="senha" name="senha" placeholder="Deixe em branco para manter">
+                </div>
 
-            <button type="submit" class="btn-salvar">Salvar Alterações</button>
-        </form>
+                <button type="submit" class="btn-green btn-block">Salvar Alterações</button>
+            </form>
 
-        <form method="POST" action="../controller/routes.php?acao=excluir" 
-              onsubmit="return confirm('Tem certeza que deseja excluir sua conta?');">
-            <input type="hidden" name="id" value="<?php echo $usuario['idUsuario']; ?>">
-            <button type="submit" class="btn-excluir">Excluir Conta</button>
-        </form>
+            <div class="danger-zone">
+                <form method="POST" action="../controller/routes.php?acao=excluir" 
+                      onsubmit="return confirm('Tem certeza que deseja excluir sua conta?');">
+                    <input type="hidden" name="id" value="<?php echo $usuario['idUsuario']; ?>">
+                    <button type="submit" class="btn-red btn-block">Excluir Conta</button>
+                </form>
+            </div>
 
-        <a href="../view/dashboard.php" class="btn-voltar">Voltar ao Dashboard</a>
+            <hr style="border: 0; border-top: 1px solid #5A2E1C; margin: 30px 0;">
+
+            <h3 style="color: #1F4D36; font-family: 'Poppins', sans-serif;">Alterar Foto de Perfil</h3>
+
+            <form method="POST" action="../controller/routes.php?acao=uploadFoto" enctype="multipart/form-data">
+                <label style="color: #1F4D36; font-weight: 600; display: block; margin-top: 15px;">
+                    Escolha sua Foto (PNG, JPG, JPEG):
+                </label>
+                <input type="file" name="foto" accept="image/png, image/jpeg, image/jpg" required 
+                       style="margin-bottom: 15px; display: block; width: 100%; padding: 10px; border-bottom: 2px solid #5A2E1C;">
+                
+                <button type="submit" class="btn-salvar" 
+                        style="background-color: #E48C2A; color: white; width: 100%; padding: 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    Fazer Upload da Imagem
+                </button>
+            </form>
+
+            <a href="../view/dashboard.php" class="btn-secondary btn-block">Voltar ao Dashboard</a>
+        </div>
     </div>
 </section>
 

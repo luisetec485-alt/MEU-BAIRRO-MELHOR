@@ -4,17 +4,14 @@ require_once '../model/CategoriaModel.php';
 
 class CategoriaController {
 
-    // abrir formulário
     public function abrirFormulario() {
         require_once '../view/categoriaForm.php';
     }
 
-    // salvar categoria
     public function salvar() {
 
         $nome = trim($_POST['nome'] ?? '');
 
-        // validar campo vazio
         if(empty($nome)) {
 
             echo "
@@ -27,7 +24,6 @@ class CategoriaController {
             return;
         }
 
-        // validar tamanho
         if(strlen($nome) > 100){
 
             echo "
@@ -60,7 +56,6 @@ class CategoriaController {
         }
     }
 
-    // listar categorias
     public function listar() {
 
         $model = new CategoriaModel();
