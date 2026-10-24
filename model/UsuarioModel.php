@@ -242,7 +242,7 @@ class UsuarioModel
 
         return $resultado
             ? $resultado['endpasta']
-            : 'img/default-avatar.png';
+            : '../view/img/logo.png';
     }
 
     public function excluir($id)

@@ -53,6 +53,19 @@ class SubcategoriaModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function pertenceACategoria($subcategoriaid, $categoriaid) {
+        $conexao = Conexao::getConexao();
+
+        $stmt = $conexao->prepare(
+            "SELECT id FROM subcategorias
+             WHERE id = ? AND categoriaid = ?"
+        );
+
+        $stmt->execute([$subcategoriaid, $categoriaid]);
+
+        return (bool) $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function buscarPorId($id) {
 
         $conexao = Conexao::getConexao();

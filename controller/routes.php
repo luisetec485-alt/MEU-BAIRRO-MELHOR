@@ -3,18 +3,79 @@ require_once __DIR__.'/UsuarioController.php';
 require_once __DIR__.'/CategoriaController.php';
 require_once __DIR__.'/SubcategoriaController.php';
 require_once __DIR__.'/ProblemaController.php';
+require_once __DIR__.'/RecuperacaoSenhaController.php';
+require_once __DIR__.'/../model/Seguranca.php';
+
+Seguranca::iniciarSessao();
 
 $acao = $_GET['acao'] ?? 'dashboard';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST'
+    && !Seguranca::validarToken($_POST['csrf_token'] ?? null)
+) {
+    http_response_code(403);
+    echo 'Requisição inválida.';
+    exit;
+}
+
+$acoesPublicas = [
+    'login',
+    'recuperarSenha',
+    'mostrarRedefinicao',
+    'redefinirSenha',
+    'cadastrar'
+];
+
+$acoesAdministrativas = [
+    'painelAdmin',
+    'formCategoria',
+    'listarCategorias',
+    'salvarCategoria',
+    'formSubcategoria',
+    'listarSubcategorias',
+    'salvarSubcategoria',
+    'relatorioUsuarios',
+    'excluirProblema',
+    'atualizarStatusProblema',
+    'atualizarPrioridadeProblema',
+    'adicionarObservacao'
+];
+
+if (!in_array($acao, $acoesPublicas, true) && !isset($_SESSION['id'])) {
+    header('Location: ../view/login.php');
+    exit;
+}
+
+if (in_array($acao, $acoesAdministrativas, true)
+    && (int) ($_SESSION['nivelAcesso'] ?? 1) !== 0
+) {
+    http_response_code(403);
+    echo 'Acesso negado.';
+    exit;
+}
 
 $usuarioController = new UsuarioController();
 $categoriaController = new CategoriaController();
 $subcategoriaController = new SubcategoriaController();
 $problemaController = new ProblemaController();
+$recuperacaoSenhaController = new RecuperacaoSenhaController();
 
 switch ($acao) {
 
     case 'login':
         $usuarioController->login();
+        break;
+
+    case 'recuperarSenha':
+        $recuperacaoSenhaController->solicitarRecuperacao();
+        break;
+
+    case 'mostrarRedefinicao':
+        $recuperacaoSenhaController->mostrarRedefinicao();
+        break;
+
+    case 'redefinirSenha':
+        $recuperacaoSenhaController->redefinirSenha();
         break;
 
     case 'cadastrar':
@@ -69,12 +130,44 @@ switch ($acao) {
         $problemaController->listar();
         break;
 
+    case 'historicoProblema':
+        $problemaController->historico();
+        break;
+
     case 'salvarProblema':
         $problemaController->salvar();
         break;
 
+    case 'cancelarProblema':
+        $problemaController->cancelar();
+        break;
+
+    case 'excluirProblema':
+        $problemaController->excluir();
+        break;
+
+    case 'atualizarStatusProblema':
+        $problemaController->atualizarStatus();
+        break;
+
+    case 'atualizarPrioridadeProblema':
+        $problemaController->atualizarPrioridade();
+        break;
+
+    case 'adicionarObservacao':
+        $problemaController->adicionarObservacao();
+        break;
+
     case 'dashboard':
         include __DIR__."/../view/dashboard.php";
+        break;
+
+    case 'painelAdmin':
+        include __DIR__."/../view/adminDashboard.php";
+        break;
+
+    case 'relatorioUsuarios':
+        include __DIR__."/../view/usuariosRelatorio.php";
         break;
 
     case 'uploadFoto':

@@ -1,5 +1,6 @@
 <?php
 require_once '../model/UsuarioModel.php';
+require_once '../model/Conexao.php';
 
 class UsuarioController {
     
@@ -103,7 +104,7 @@ class UsuarioController {
             return;
         }
 
-if (!preg_match('/^\d+$/', $senha)) {
+if (!preg_match('/^(?=.*[A-Za-z])(?=.*\d).{8,}$/', $senha)) {
     echo '
         <!DOCTYPE html>
         <html>
@@ -114,7 +115,7 @@ if (!preg_match('/^\d+$/', $senha)) {
         <script>
         Swal.fire({
             title: "Erro!",
-            text: "A senha deve conter apenas números e não pode ter espaços!",
+            text: "A senha deve conter letras e números e ter no mínimo 8 caracteres!",
             icon: "error"
         }).then(() => {
             window.history.back();
@@ -240,9 +241,12 @@ if (!preg_match('/^\d+$/', $senha)) {
                 session_start();
             }
 
+            session_regenerate_id(true);
+
             $_SESSION['id'] = $resultado['idUsuario'];
             $_SESSION['nomeUsuario'] = $resultado['nomeUsuario'];
             $_SESSION['foto'] = $resultado['foto'];
+            $_SESSION['nivelAcesso'] = (int) $resultado['nivelAcesso'];
 
             header("Location: ../view/dashboard.php");
             exit;
@@ -270,15 +274,26 @@ if (!preg_match('/^\d+$/', $senha)) {
     }
 
     public function uploadFoto() {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         if (isset($_SESSION['id']) && isset($_FILES['foto'])) {
             $idUsuario = $_SESSION['id'];
             
             $extensao = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
-            $extesoesPermitidas = ['jpg', 'jpeg', 'png'];
+            $extensoesPermitidas = ['jpg', 'jpeg', 'png'];
+            $tiposPermitidos = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png'];
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $tipoMime = $finfo ? finfo_file($finfo, $_FILES['foto']['tmp_name']) : false;
+            if ($finfo) {
+                finfo_close($finfo);
+            }
     
-            if (in_array($extensao, $extesoesPermitidas)) {
-                $nomeFoto = uniqid() . "." . $extensao;
+            if (in_array($extensao, $extensoesPermitidas, true)
+                && $tipoMime === $tiposPermitidos[$extensao]
+                && $_FILES['foto']['size'] <= 5 * 1024 * 1024
+            ) {
+                $nomeFoto = bin2hex(random_bytes(16)) . "." . $extensao;
                 $diretorioDestino = __DIR__ . "/../view/img/" . $nomeFoto;
                 if (move_uploaded_file($_FILES['foto']['tmp_name'], $diretorioDestino)) {
                     $caminhoBanco = "img/" . $nomeFoto;
@@ -309,7 +324,9 @@ if (!preg_match('/^\d+$/', $senha)) {
     }
 
     public function mostrarEditar() {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
         if(!isset($_SESSION['id'])){
             header('Location: ../view/login.php');
@@ -325,7 +342,9 @@ if (!preg_match('/^\d+$/', $senha)) {
     }
 
     public function atualizar() {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         $id = $_SESSION['id'];
         $nome = $_POST['nome'] ?? '';
         $email = strtolower(trim($_POST['email'] ?? ''));
@@ -354,7 +373,10 @@ if (!preg_match('/^\d+$/', $senha)) {
             return;
         }
 
-        if(!empty($senha) && strlen($senha) < 8){
+        if(!empty($senha) && (
+            strlen($senha) < 8
+            || !preg_match('/^(?=.*[A-Za-z])(?=.*\d).{8,}$/', $senha)
+        )){
             echo '
                 <!DOCTYPE html>
                 <html>
@@ -365,7 +387,7 @@ if (!preg_match('/^\d+$/', $senha)) {
                 <script>
                 Swal.fire({
                     title: "Erro!",
-                    text: "A senha deve ter no mínimo 8 caracteres!",
+                    text: "A senha deve conter letras e números e ter no mínimo 8 caracteres!",
                     icon: "error"
                 }).then(() => {
                     window.history.back();
@@ -385,8 +407,7 @@ if (!preg_match('/^\d+$/', $senha)) {
             $model->atualizar($id, $nome, $email);
         }
         
-        session_start();
-        $_SESSION['nome'] = $nome;
+        $_SESSION['nomeUsuario'] = $nome;
         echo '
             <!DOCTYPE html>
             <html>
@@ -409,11 +430,12 @@ if (!preg_match('/^\d+$/', $senha)) {
     }
 
     public function excluir() {
-        session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
         $id = $_SESSION['id'];
         $model = new UsuarioModel();
         $model->excluir($id);
-        session_start();
         session_destroy();
         echo '
             <!DOCTYPE html>

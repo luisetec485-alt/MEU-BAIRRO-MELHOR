@@ -1,10 +1,19 @@
+<?php
+require_once __DIR__.'/../model/Seguranca.php';
+Seguranca::iniciarSessao();
+$usuario = $usuario ?? [
+    'idUsuario' => $_SESSION['id'] ?? '',
+    'nomeUsuario' => $_SESSION['nomeUsuario'] ?? '',
+    'Email' => $_SESSION['Email'] ?? ''
+];
+?>
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Usuário - Meu Bairro Melhor</title>
-    <link rel="stylesheet" href="../view/css/style.css">
+    <link rel="stylesheet" href="../view/css/style.css?v=<?= time() ?>">
 </head>
 <body>
 
@@ -19,6 +28,7 @@
             <p>Mantenha suas informações de perfil atualizadas.</p>
 
             <form method="POST" action="../controller/routes.php?acao=atualizar" class="form-moderno">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Seguranca::token(), ENT_QUOTES, 'UTF-8') ?>">
                 <input type="hidden" name="id" value="<?php echo $usuario['idUsuario']; ?>">
 
                 <div class="form-group">
@@ -42,6 +52,7 @@
             <div class="danger-zone">
                 <form method="POST" action="../controller/routes.php?acao=excluir" 
                       onsubmit="return confirm('Tem certeza que deseja excluir sua conta?');">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Seguranca::token(), ENT_QUOTES, 'UTF-8') ?>">
                     <input type="hidden" name="id" value="<?php echo $usuario['idUsuario']; ?>">
                     <button type="submit" class="btn-red btn-block">Excluir Conta</button>
                 </form>
@@ -52,6 +63,7 @@
             <h3 style="color: #1F4D36; font-family: 'Poppins', sans-serif;">Alterar Foto de Perfil</h3>
 
             <form method="POST" action="../controller/routes.php?acao=uploadFoto" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Seguranca::token(), ENT_QUOTES, 'UTF-8') ?>">
                 <label style="color: #1F4D36; font-weight: 600; display: block; margin-top: 15px;">
                     Escolha sua Foto (PNG, JPG, JPEG):
                 </label>

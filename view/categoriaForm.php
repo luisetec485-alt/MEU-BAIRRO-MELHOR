@@ -1,5 +1,9 @@
 <?php
-session_start();
+require_once __DIR__.'/../model/Seguranca.php';
+Seguranca::iniciarSessao();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 if(!isset($_SESSION['id'])){
     header("Location: login.php");
@@ -13,12 +17,12 @@ if(!isset($_SESSION['id'])){
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
     <title>Nova Categoria - Meu Bairro Melhor</title>
-    <link rel="stylesheet" href="../view/css/style.css">
+    <link rel="stylesheet" href="../view/css/style.css?v=<?= time() ?>">
 </head>
 <body>
 
 <div class="fixed-logo">
-    <img src="img/logo.png" alt="Logo Meu Bairro Melhor">
+    <img src="../view/img/logo.png" alt="Logo Meu Bairro Melhor">
 </div>
 
 <section class="screen">
@@ -29,6 +33,7 @@ if(!isset($_SESSION['id'])){
             <p>Cadastre uma nova categoria de problemas urbanos.</p>
 
             <form method="POST" action="../controller/routes.php?acao=salvarCategoria" class="form-moderno">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Seguranca::token(), ENT_QUOTES, 'UTF-8') ?>">
 
                 <div class="form-group">
                     <label for="nome">Nome da Categoria:</label>

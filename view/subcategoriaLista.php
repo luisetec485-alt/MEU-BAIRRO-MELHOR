@@ -1,5 +1,9 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+$subcategorias = $subcategorias ?? [];
 
 if(!isset($_SESSION['id'])){
     header("Location: login.php");
@@ -13,12 +17,12 @@ if(!isset($_SESSION['id'])){
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lista de Subcategorias</title>
-    <link rel="stylesheet" href="../view/css/style.css">
+    <link rel="stylesheet" href="../view/css/style.css?v=<?= time() ?>">
 </head>
 <body>
 
 <div class="fixed-logo">
-    <img src="img/logo.png" alt="Logo Meu Bairro Melhor">
+    <img src="../view/img/logo.png" alt="Logo Meu Bairro Melhor">
 </div>
 
 <section class="screen">
