@@ -1,19 +1,10 @@
 <?php
 require_once __DIR__.'/../model/Seguranca.php';
-Seguranca::iniciarSessao();
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+Seguranca::exigirLogin();
 
 $categorias = $categorias ?? [];
 $subcategorias = $subcategorias ?? [];
 $problemas = $problemas ?? [];
-
-if (!isset($_SESSION['id'])) {
-    header("Location: login.php");
-    exit;
-}
 
 $usuarioLogadoId = (int) $_SESSION['id'];
 $usuarioEhAdmin = (int) ($_SESSION['nivelAcesso'] ?? 1) === 0;

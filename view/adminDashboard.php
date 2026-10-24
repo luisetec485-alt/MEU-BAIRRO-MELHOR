@@ -1,18 +1,6 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-if (!isset($_SESSION['id'])) {
-    header('Location: login.php');
-    exit;
-}
-
-if ((int) ($_SESSION['nivelAcesso'] ?? 1) !== 0) {
-    http_response_code(403);
-    echo 'Acesso negado.';
-    exit;
-}
+require_once __DIR__ . '/../model/Seguranca.php';
+Seguranca::exigirAdministrador();
 
 require_once __DIR__.'/../model/ProblemaModel.php';
 
@@ -374,5 +362,4 @@ include __DIR__ . '/header.php';
         }
     });
 </script>
-</body>
-</html>
+<?php include __DIR__ . '/footer.php'; ?>

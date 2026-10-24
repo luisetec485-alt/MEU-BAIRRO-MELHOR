@@ -1,0 +1,5 @@
+Options -Indexes
+
+RewriteEngine On
+RewriteRule ^controller/(?!routes\.php$) - [F,L]
+RewriteRule ^(?:model|config|sql)(?:/|$) - [F,L]

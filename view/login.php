@@ -1,40 +1,10 @@
-<?php require_once __DIR__.'/../model/Seguranca.php'; Seguranca::iniciarSessao(); ?>
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Meu Bairro Melhor</title>
-    <link rel="stylesheet" href="../view/css/style.css?v=<?= time() ?>">
-    <style>
-        .login-links {
-            margin-top: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .link-senha {
-            color: #3b82f6;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            display: inline-block;
-        }
-        
-        .link-senha:hover {
-            color: #2563eb;
-            text-decoration: underline;
-            transform: translateX(2px);
-        }
-    </style>
-</head>
-<body class="auth-page">
-
-<div class="fixed-logo">
-    <img src="../view/img/logo.png" alt="Logo Meu Bairro Melhor">
-</div>
+<?php
+require_once __DIR__.'/../model/Seguranca.php';
+Seguranca::iniciarSessao();
+$pageTitle = 'Login - Meu Bairro Melhor';
+$bodyClass = 'auth-page';
+include __DIR__ . '/header.php';
+?>
 
 <section class="screen">
     <div class="dashboard-container max-width-small">
@@ -68,5 +38,4 @@
 </section>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</body>
-</html>
+<?php include __DIR__ . '/footer.php'; ?>

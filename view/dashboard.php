@@ -1,12 +1,6 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-if(!isset($_SESSION['id'])){
-    header("Location: ../view/login.php");
-    exit;
-}
+require_once __DIR__ . '/../model/Seguranca.php';
+Seguranca::exigirLogin();
 
 require_once __DIR__.'/../model/ProblemaModel.php';
 require_once __DIR__.'/../model/NotificacaoModel.php';
@@ -323,5 +317,4 @@ include __DIR__ . '/header.php';
     }
 </script>
 
-</body>
-</html>
+<?php include __DIR__ . '/footer.php'; ?>

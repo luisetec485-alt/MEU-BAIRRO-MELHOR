@@ -22,6 +22,36 @@ class Seguranca
         }
     }
 
+    public static function exigirLogin()
+    {
+        self::iniciarSessao();
+
+        if (isset($_SESSION['id'])) {
+            return;
+        }
+
+        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
+        $loginPath = preg_match('~/controller/[^/]+$~i', $scriptName)
+            ? '../view/login.php'
+            : 'login.php';
+
+        header('Location: ' . $loginPath);
+        exit;
+    }
+
+    public static function exigirAdministrador()
+    {
+        self::exigirLogin();
+
+        if ((int) ($_SESSION['nivelAcesso'] ?? 1) === 0) {
+            return;
+        }
+
+        http_response_code(403);
+        echo 'Acesso negado.';
+        exit;
+    }
+
     public static function token()
     {
         self::iniciarSessao();

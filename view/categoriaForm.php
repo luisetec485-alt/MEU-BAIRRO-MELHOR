@@ -1,29 +1,12 @@
 <?php
 require_once __DIR__.'/../model/Seguranca.php';
-Seguranca::iniciarSessao();
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-if(!isset($_SESSION['id'])){
-    header("Location: login.php");
-    exit;
-}
+Seguranca::exigirAdministrador();
 ?>
 
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>Nova Categoria - Meu Bairro Melhor</title>
-    <link rel="stylesheet" href="../view/css/style.css?v=<?= time() ?>">
-</head>
-<body>
-
-<div class="fixed-logo">
-    <img src="../view/img/logo.png" alt="Logo Meu Bairro Melhor">
-</div>
+<?php
+$pageTitle = 'Nova Categoria - Meu Bairro Melhor';
+include __DIR__ . '/header.php';
+?>
 
 <section class="screen">
     <div class="dashboard-container max-width-small">
@@ -60,5 +43,4 @@ if(!isset($_SESSION['id'])){
     </div>
 </section>
 
-</body>
-</html>
+<?php include __DIR__ . '/footer.php'; ?>

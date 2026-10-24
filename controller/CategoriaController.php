@@ -1,6 +1,7 @@
 <?php
 // 
 require_once '../model/CategoriaModel.php';
+require_once '../model/MensagemFlash.php';
 
 class CategoriaController {
 
@@ -12,48 +13,38 @@ class CategoriaController {
 
         $nome = trim($_POST['nome'] ?? '');
 
-        if(empty($nome)) {
-
-            echo "
-            <script>
-                alert('Digite o nome da categoria!');
-                history.back();
-            </script>
-            ";
-
-            return;
+        if (empty($nome)) {
+            MensagemFlash::redirecionar(
+                'routes.php?acao=formCategoria',
+                'Digite o nome da categoria.',
+                'erro'
+            );
         }
 
-        if(strlen($nome) > 100){
-
-            echo "
-            <script>
-                alert('Categoria muito longa!');
-                history.back();
-            </script>
-            ";
-
-            return;
+        if (strlen($nome) > 100) {
+            MensagemFlash::redirecionar(
+                'routes.php?acao=formCategoria',
+                'O nome da categoria deve ter no máximo 100 caracteres.',
+                'erro'
+            );
         }
 
         $model = new CategoriaModel();
 
         $resultado = $model->inserir($nome);
 
-        if($resultado == "existe") {
-
-            echo "
-            <script>
-                alert('Categoria já cadastrada!');
-                history.back();
-            </script>
-            ";
-
-        } else {
-
-            header("Location: ../view/dashboard.php");
-            exit;
+        if ($resultado === 'existe') {
+            MensagemFlash::redirecionar(
+                'routes.php?acao=formCategoria',
+                'Essa categoria já está cadastrada.',
+                'erro'
+            );
         }
+
+        MensagemFlash::redirecionar(
+            'routes.php?acao=listarCategorias',
+            'Categoria cadastrada com sucesso.'
+        );
     }
 
     public function listar() {

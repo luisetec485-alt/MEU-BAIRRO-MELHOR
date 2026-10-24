@@ -1,22 +1,11 @@
 <?php
+require_once __DIR__ . '/../model/Seguranca.php';
+Seguranca::exigirAdministrador();
+
 function mascararEmail($email) {
     [$usuario, $dominio] = array_pad(explode('@', $email, 2), 2, '');
     $visivel = substr($usuario, 0, 1);
     return $visivel . str_repeat('*', max(1, strlen($usuario) - 1)) . '@' . $dominio;
-}
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-if (!isset($_SESSION['id'])) {
-    header('Location: login.php');
-    exit;
-}
-
-if ((int) ($_SESSION['nivelAcesso'] ?? 1) !== 0) {
-    http_response_code(403);
-    echo 'Acesso negado.';
-    exit;
 }
 
 require_once __DIR__ . '/../model/Conexao.php';

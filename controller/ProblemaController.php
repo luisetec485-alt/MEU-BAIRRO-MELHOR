@@ -6,6 +6,7 @@ require_once __DIR__.'/../model/SubcategoriaModel.php';
 require_once __DIR__.'/../model/UsuarioModel.php';
 require_once __DIR__.'/../model/AuxiliarEmail.php';
 require_once __DIR__.'/../model/NotificacaoModel.php';
+require_once __DIR__.'/../model/MensagemFlash.php';
 
 class ProblemaController {
 
@@ -89,33 +90,48 @@ class ProblemaController {
             empty($longitude) ||
             empty($prioridade)
         ) {
-            echo "Preencha todos os campos e selecione a localização no mapa.";
-            return;
+            MensagemFlash::redirecionar(
+                'routes.php?acao=formProblema',
+                'Preencha os campos obrigatórios e selecione a localização no mapa.',
+                'erro'
+            );
         }
 
         if ($latitude === false || $longitude === false
             || $latitude < -90 || $latitude > 90
             || $longitude < -180 || $longitude > 180
         ) {
-            echo "Informe coordenadas válidas para a localização.";
-            return;
+            MensagemFlash::redirecionar(
+                'routes.php?acao=formProblema',
+                'Selecione uma localização válida no mapa.',
+                'erro'
+            );
         }
 
         if (!$this->pontoEmFrancoDaRocha($latitude, $longitude)) {
-            echo "A localização deve estar dentro de Franco da Rocha.";
-            return;
+            MensagemFlash::redirecionar(
+                'routes.php?acao=formProblema',
+                'A localização selecionada deve estar dentro de Franco da Rocha.',
+                'erro'
+            );
         }
 
         $subcategoriaModel = new SubcategoriaModel();
 
         if (!(new CategoriaModel())->buscarPorId($categoriaid)) {
-            echo "A categoria selecionada não existe.";
-            return;
+            MensagemFlash::redirecionar(
+                'routes.php?acao=formProblema',
+                'A categoria selecionada não está disponível. Escolha outra.',
+                'erro'
+            );
         }
 
         if (!$subcategoriaModel->pertenceACategoria($subcategoriaid, $categoriaid)) {
-            echo "A subcategoria selecionada não pertence à categoria informada.";
-            return;
+            MensagemFlash::redirecionar(
+                'routes.php?acao=formProblema',
+                'Escolha uma subcategoria pertencente à categoria selecionada.',
+                'erro'
+            );
         }
 
         /*
@@ -154,11 +170,11 @@ class ProblemaController {
             if (!in_array($extensao, $extensoesPermitidas, true)
                 || $tipoMime !== $tiposPermitidos[$extensao]
             ) {
-                echo "<script>
-                        alert('Extensão inválida! Use apenas JPG, JPEG, PNG, MP4, MOV, AVI ou WEBM.');
-                        history.back();
-                      </script>";
-                return;
+                MensagemFlash::redirecionar(
+                    'routes.php?acao=formProblema',
+                    'O arquivo deve ser uma imagem ou vídeo em formato permitido (JPG, PNG, MP4, MOV, AVI ou WEBM).',
+                    'erro'
+                );
             }
 
             $tipoArquivo = in_array(
@@ -176,11 +192,7 @@ class ProblemaController {
                     ? 'Imagem muito grande! O limite é de 10MB.'
                     : 'Vídeo muito grande! O limite é de 50MB.';
 
-                echo "<script>
-                        alert('{$mensagem}');
-                        history.back();
-                      </script>";
-                return;
+                MensagemFlash::redirecionar('routes.php?acao=formProblema', $mensagem, 'erro');
             }
 
             $pastaDestino = __DIR__
@@ -200,11 +212,11 @@ class ProblemaController {
                 $_FILES['imagem']['tmp_name'],
                 $destino
             )) {
-                echo "<script>
-                        alert('Erro ao enviar o arquivo. Tente novamente.');
-                        history.back();
-                      </script>";
-                return;
+                MensagemFlash::redirecionar(
+                    'routes.php?acao=formProblema',
+                    'Não foi possível enviar o arquivo. Tente novamente.',
+                    'erro'
+                );
             }
 
             $imagem = $tipoArquivo
@@ -228,14 +240,17 @@ class ProblemaController {
         );
 
         if (!$resultado) {
-            echo "Erro ao registrar o problema.";
-            return;
+            MensagemFlash::redirecionar(
+                'routes.php?acao=formProblema',
+                'Não foi possível registrar o problema. Revise os dados e tente novamente.',
+                'erro'
+            );
         }
 
-        header(
-            'Location: routes.php?acao=listarProblemas'
+        MensagemFlash::redirecionar(
+            'routes.php?acao=listarProblemas',
+            'Problema registrado com sucesso.'
         );
-        exit;
     }
 
     public function cancelar() {
@@ -250,26 +265,27 @@ class ProblemaController {
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
-            echo "Método não permitido.";
+            echo "Esta operação não aceita esse tipo de solicitação.";
             return;
         }
 
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
 
         if (!$id) {
-            echo "Denúncia inválida.";
-            return;
+            MensagemFlash::redirecionar('routes.php?acao=listarProblemas', 'Não foi possível identificar a denúncia.', 'erro');
         }
 
         $model = new ProblemaModel();
 
         if (!$model->cancelar($id, $_SESSION['id'])) {
-            echo "A denúncia não existe, não pertence a você ou não pode mais ser cancelada.";
-            return;
+            MensagemFlash::redirecionar(
+                'routes.php?acao=listarProblemas',
+                'A denúncia não pode ser cancelada. Verifique se ela pertence à sua conta e ainda está aberta.',
+                'erro'
+            );
         }
 
-        header("Location: routes.php?acao=listarProblemas");
-        exit;
+        MensagemFlash::redirecionar('routes.php?acao=listarProblemas', 'Denúncia cancelada com sucesso.');
     }
 
     public function excluir() {
@@ -290,26 +306,23 @@ class ProblemaController {
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
-            echo "Método não permitido.";
+            echo "Esta operação não aceita esse tipo de solicitação.";
             return;
         }
 
         $id = filter_input(INPUT_POST, 'id', FILTER_VALIDATE_INT);
 
         if (!$id) {
-            echo "Denúncia inválida.";
-            return;
+            MensagemFlash::redirecionar('routes.php?acao=listarProblemas', 'Não foi possível identificar a denúncia.', 'erro');
         }
 
         $model = new ProblemaModel();
 
         if (!$model->excluir($id, $_SESSION['id'])) {
-            echo "Não foi possível excluir a denúncia.";
-            return;
+            MensagemFlash::redirecionar('routes.php?acao=listarProblemas', 'Não foi possível excluir a denúncia.', 'erro');
         }
 
-        header("Location: routes.php?acao=listarProblemas");
-        exit;
+        MensagemFlash::redirecionar('routes.php?acao=listarProblemas', 'Denúncia excluída com sucesso.');
     }
 
     public function atualizarStatus() {
@@ -330,7 +343,7 @@ class ProblemaController {
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
-            echo "Método não permitido.";
+            echo "Esta operação não aceita esse tipo de solicitação.";
             return;
         }
 
@@ -339,21 +352,18 @@ class ProblemaController {
         $statusPermitidos = ['aberta', 'em_analise', 'resolvida', 'cancelada'];
 
         if (!$id || !in_array($status, $statusPermitidos, true)) {
-            echo "Dados inválidos.";
-            return;
+            MensagemFlash::redirecionar('routes.php?acao=listarProblemas', 'O status informado é inválido.', 'erro');
         }
 
         $model = new ProblemaModel();
         $problema = $model->buscarPorId($id);
 
         if (!$problema) {
-            echo "Denúncia não encontrada.";
-            return;
+            MensagemFlash::redirecionar('routes.php?acao=listarProblemas', 'Denúncia não encontrada.', 'erro');
         }
 
         if (!$model->atualizarStatus($id, $status, $_SESSION['id'])) {
-            echo "Não foi possível atualizar o status.";
-            return;
+            MensagemFlash::redirecionar('routes.php?acao=listarProblemas', 'Não foi possível atualizar o status da denúncia.', 'erro');
         }
 
         // Notificação via E-mail
@@ -377,8 +387,7 @@ class ProblemaController {
         $msgNotif = "O status da sua denúncia {$problema['codigoDenuncia']} foi alterado para " . ucfirst(str_replace('_', ' ', $status)) . ".";
         $notifModel->criar($problema['usuarioid'], $msgNotif);
 
-        header("Location: routes.php?acao=listarProblemas");
-        exit;
+        MensagemFlash::redirecionar('routes.php?acao=listarProblemas', 'Status da denúncia atualizado com sucesso.');
     }
 
     public function atualizarPrioridade() {
@@ -399,7 +408,7 @@ class ProblemaController {
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
-            echo "Método não permitido.";
+            echo "Esta operação não aceita esse tipo de solicitação.";
             return;
         }
 
@@ -408,19 +417,16 @@ class ProblemaController {
         $prioridadesPermitidas = ['baixa', 'media', 'alta', 'critica'];
 
         if (!$id || !in_array($prioridade, $prioridadesPermitidas, true)) {
-            echo "Dados inválidos.";
-            return;
+            MensagemFlash::redirecionar('routes.php?acao=listarProblemas', 'A prioridade informada é inválida.', 'erro');
         }
 
         $model = new ProblemaModel();
 
         if (!$model->atualizarPrioridade($id, $prioridade, $_SESSION['id'])) {
-            echo "Não foi possível atualizar a prioridade.";
-            return;
+            MensagemFlash::redirecionar('routes.php?acao=listarProblemas', 'Não foi possível atualizar a prioridade da denúncia.', 'erro');
         }
 
-        header("Location: routes.php?acao=listarProblemas");
-        exit;
+        MensagemFlash::redirecionar('routes.php?acao=listarProblemas', 'Prioridade da denúncia atualizada com sucesso.');
     }
 
     public function adicionarObservacao() {
@@ -441,7 +447,7 @@ class ProblemaController {
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             http_response_code(405);
-            echo "Método não permitido.";
+            echo "Esta operação não aceita esse tipo de solicitação.";
             return;
         }
 
@@ -449,8 +455,7 @@ class ProblemaController {
         $observacoes = $_POST['observacoes'] ?? '';
 
         if (!$id || empty(trim($observacoes))) {
-            echo "Dados inválidos.";
-            return;
+            MensagemFlash::redirecionar('routes.php?acao=listarProblemas', 'Informe uma observação válida para a denúncia.', 'erro');
         }
 
         $observacoes = trim($observacoes);
@@ -458,12 +463,10 @@ class ProblemaController {
         $model = new ProblemaModel();
 
         if (!$model->adicionarObservacao($id, $observacoes, $_SESSION['id'])) {
-            echo "Não foi possível adicionar a observação.";
-            return;
+            MensagemFlash::redirecionar('routes.php?acao=listarProblemas', 'Não foi possível salvar a observação.', 'erro');
         }
 
-        header("Location: routes.php?acao=listarProblemas");
-        exit;
+        MensagemFlash::redirecionar('routes.php?acao=listarProblemas', 'Observação adicionada com sucesso.');
     }
 
     public function historico() {
@@ -481,16 +484,16 @@ class ProblemaController {
         $problema = $id ? $model->buscarPorId($id) : false;
 
         if (!$problema) {
-            http_response_code(404);
-            echo "Denúncia não encontrada.";
-            return;
+            MensagemFlash::redirecionar('routes.php?acao=listarProblemas', 'Denúncia não encontrada.', 'erro');
         }
 
         $ehAdministrador = (int) ($_SESSION['nivelAcesso'] ?? 1) === 0;
         if (!$ehAdministrador && (int) $problema['usuarioid'] !== (int) $_SESSION['id']) {
-            http_response_code(403);
-            echo "Acesso negado.";
-            return;
+            MensagemFlash::redirecionar(
+                'routes.php?acao=listarProblemas',
+                'Você não tem permissão para consultar o histórico desta denúncia.',
+                'erro'
+            );
         }
 
         $historico = $model->listarHistorico($id);

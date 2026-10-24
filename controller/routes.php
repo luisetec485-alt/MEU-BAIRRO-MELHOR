@@ -5,6 +5,7 @@ require_once __DIR__.'/SubcategoriaController.php';
 require_once __DIR__.'/ProblemaController.php';
 require_once __DIR__.'/RecuperacaoSenhaController.php';
 require_once __DIR__.'/../model/Seguranca.php';
+require_once __DIR__.'/../model/MensagemFlash.php';
 
 Seguranca::iniciarSessao();
 
@@ -13,9 +14,29 @@ $acao = $_GET['acao'] ?? 'dashboard';
 if ($_SERVER['REQUEST_METHOD'] === 'POST'
     && !Seguranca::validarToken($_POST['csrf_token'] ?? null)
 ) {
-    http_response_code(403);
-    echo 'Requisição inválida.';
-    exit;
+    $destinosCsrf = [
+        'login' => '../view/login.php',
+        'cadastrar' => '../view/cadastro.php',
+        'recuperarSenha' => '../view/esqueceuSenha.php',
+        'redefinirSenha' => '../view/login.php',
+        'atualizar' => 'routes.php?acao=editar',
+        'uploadFoto' => 'routes.php?acao=editar',
+        'salvarCategoria' => 'routes.php?acao=formCategoria',
+        'salvarSubcategoria' => 'routes.php?acao=formSubcategoria',
+        'salvarProblema' => 'routes.php?acao=formProblema',
+        'cancelarProblema' => 'routes.php?acao=listarProblemas',
+        'excluirProblema' => 'routes.php?acao=listarProblemas',
+        'atualizarStatusProblema' => 'routes.php?acao=listarProblemas',
+        'atualizarPrioridadeProblema' => 'routes.php?acao=listarProblemas',
+        'adicionarObservacao' => 'routes.php?acao=listarProblemas',
+        'excluir' => 'routes.php?acao=editar'
+    ];
+    $destino = $destinosCsrf[$acao] ?? '../view/login.php';
+    MensagemFlash::redirecionar(
+        $destino,
+        'Sua solicitação expirou ou é inválida. Tente novamente.',
+        'erro'
+    );
 }
 
 $acoesPublicas = [

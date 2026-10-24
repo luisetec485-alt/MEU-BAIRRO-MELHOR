@@ -1,7 +1,6 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/../model/Seguranca.php';
+Seguranca::exigirLogin();
 
 $historico = $historico ?? [];
 $problema = $problema ?? [];
@@ -72,3 +71,5 @@ function valorHistorico($valor, $campo) {
         </div>
     </div>
 </section>
+
+<?php include __DIR__ . '/footer.php'; ?>

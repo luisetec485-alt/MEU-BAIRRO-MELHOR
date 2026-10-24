@@ -2,6 +2,7 @@
 
 require_once '../model/SubcategoriaModel.php';
 require_once '../model/CategoriaModel.php';
+require_once '../model/MensagemFlash.php';
 
 class SubcategoriaController {
     public function abrirFormulario() {
@@ -14,34 +15,37 @@ class SubcategoriaController {
 
         $nome = trim($_POST['nome'] ?? '');
         $categoriaid = $_POST['categoriaid'] ?? '';
-        if(empty($nome) || empty($categoriaid)) {
-
-            echo "
-            <script>
-                alert('Preencha todos os campos!');
-                history.back();
-            </script>
-            ";
-
-            return;
+        if (empty($nome) || empty($categoriaid)) {
+            MensagemFlash::redirecionar(
+                'routes.php?acao=formSubcategoria',
+                'Preencha todos os campos da subcategoria.',
+                'erro'
+            );
         }
 
-        if(strlen($nome) > 100){
+        if (strlen($nome) > 100) {
+            MensagemFlash::redirecionar(
+                'routes.php?acao=formSubcategoria',
+                'O nome da subcategoria deve ter no máximo 100 caracteres.',
+                'erro'
+            );
+        }
 
-            echo "
-            <script>
-                alert('Nome muito longo!');
-                history.back();
-            </script>
-            ";
-
-            return;
+        $categoriaModel = new CategoriaModel();
+        if (!$categoriaModel->buscarPorId($categoriaid)) {
+            MensagemFlash::redirecionar(
+                'routes.php?acao=formSubcategoria',
+                'Selecione uma categoria válida.',
+                'erro'
+            );
         }
 
         $model = new SubcategoriaModel();
         $model->inserir($nome, $categoriaid);
-        header("Location: ../view/dashboard.php");
-        exit;
+        MensagemFlash::redirecionar(
+            'routes.php?acao=listarSubcategorias',
+            'Subcategoria cadastrada com sucesso.'
+        );
     }
 
     public function listar() {

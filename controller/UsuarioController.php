@@ -1,233 +1,58 @@
 <?php
 require_once '../model/UsuarioModel.php';
 require_once '../model/Conexao.php';
+require_once '../model/MensagemFlash.php';
 
 class UsuarioController {
     
-    public function cadastrar() {   
+    public function cadastrar() {
         $nome = $_POST['nome'] ?? '';
         $email = strtolower(trim($_POST['email'] ?? ''));
         $senha = $_POST['senha'] ?? '';
 
-        if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-            echo '
-                <!DOCTYPE html>
-                <html>
-                <head>
-                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                </head>
-                <body>
-                <script>
-                Swal.fire({
-                    title: "Erro!",
-                    text: "Formato de email errado!",
-                    icon: "error",
-                    confirmButtonText: "Tentar Novamente"
-                }).then(() => {
-                    window.history.back();
-                });
-                </script>
-                </body>
-                </html>
-            ';
-            return;
+        if (empty($nome) || empty($email) || empty($senha)) {
+            MensagemFlash::redirecionar('../view/cadastro.php', 'Preencha todos os campos.', 'erro');
         }
 
-        if(strlen($nome) > 50){
-            echo '
-                <!DOCTYPE html>
-                <html>
-                <head>
-                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                </head>
-                <body>
-                <script>
-                Swal.fire({
-                    title: "Erro!",
-                    text: "Nome muito longo!",
-                    icon: "error",
-                    confirmButtonText: "Tentar Novamente"
-                }).then(() => {
-                    window.history.back();
-                });
-                </script>
-                </body>
-                </html>
-            ';
-            return;
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            MensagemFlash::redirecionar('../view/cadastro.php', 'Informe um endereço de e-mail válido.', 'erro');
         }
 
-        if(empty($nome) || empty($email) || empty($senha)) {
-            echo '
-                <!DOCTYPE html>
-                <html>
-                <head>
-                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                </head>
-                <body>
-                <script>
-                Swal.fire({
-                    title: "Erro!",
-                    text: "Todos os campos são obrigatórios!",
-                    icon: "error",
-                    confirmButtonText: "Voltar"
-                }).then(() => {
-                    window.history.back();
-                });
-                </script>
-                </body>
-                </html>
-            ';
-            return;
+        if (strlen($nome) > 50) {
+            MensagemFlash::redirecionar('../view/cadastro.php', 'O nome deve ter no máximo 50 caracteres.', 'erro');
         }
 
-        if(strlen($senha) < 8){
-            echo '
-                <!DOCTYPE html>
-                <html>
-                <head>
-                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                </head>
-                <body>
-                <script>
-                Swal.fire({
-                    title: "Erro!",
-                    text: "A senha deve ter no mínimo 8 caracteres!",
-                    icon: "error"
-                }).then(() => {
-                    window.history.back();
-                });
-                </script>
-                </body>
-                </html>
-            ';
-            return;
+        if (strlen($senha) < 8 || !preg_match('/^(?=.*[A-Za-z])(?=.*\d).{8,}$/', $senha)) {
+            MensagemFlash::redirecionar(
+                '../view/cadastro.php',
+                'A senha deve conter letras e números e ter no mínimo 8 caracteres.',
+                'erro'
+            );
         }
 
-if (!preg_match('/^(?=.*[A-Za-z])(?=.*\d).{8,}$/', $senha)) {
-    echo '
-        <!DOCTYPE html>
-        <html>
-        <head>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        </head>
-        <body>
-        <script>
-        Swal.fire({
-            title: "Erro!",
-            text: "A senha deve conter letras e números e ter no mínimo 8 caracteres!",
-            icon: "error"
-        }).then(() => {
-            window.history.back();
-        });
-        </script>
-        </body>
-        </html>
-    ';
-    return;
-}
-
-        if(strlen($senha) > 255){
-            echo '
-                <!DOCTYPE html>
-                <html>
-                <head>
-                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                </head>
-                <body>
-                <script>
-                Swal.fire({
-                    title: "Erro!",
-                    text: "Senha muito longa!",
-                    icon: "error"
-                }).then(() => {
-                    window.history.back();
-                });
-                </script>
-                </body>
-                </html>
-            ';
-            return;
-        }       
+        if (strlen($senha) > 255) {
+            MensagemFlash::redirecionar('../view/cadastro.php', 'A senha informada é muito longa.', 'erro');
+        }
 
         $senhaHash = password_hash($senha, PASSWORD_DEFAULT);
-
         $model = new UsuarioModel();
         $resultado = $model->cadastrar($nome, $email, $senhaHash);
-        
 
-        if($resultado == "emailExiste") {
-            echo '
-                <!DOCTYPE html>
-                <html>
-                <head>
-                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                </head>
-                <body>
-                <script>
-                Swal.fire({
-                    title: "Erro!",
-                    text: "Este email já está cadastrado!",
-                    icon: "error",
-                    confirmButtonText: "Voltar"
-                }).then(() => {
-                    window.location.href = "../view/cadastro.php";
-                });
-                </script>
-                </body>
-                </html>
-            ';
-        } else {
-            echo '
-                <!DOCTYPE html>
-                <html>
-                <head>
-                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                </head>
-                <body>
-                <script>
-                Swal.fire({
-                    title: "Sucesso!",
-                    text: "Usuário cadastrado com sucesso!",
-                    icon: "success"
-                }).then(() => {
-                    window.location.href = "../view/login.php";
-                });
-                </script>
-                </body>
-                </html>
-            ';
+        if ($resultado === 'emailExiste') {
+            MensagemFlash::redirecionar('../view/cadastro.php', 'Este e-mail já está cadastrado.', 'erro');
         }
+
+        MensagemFlash::redirecionar('../view/login.php', 'Cadastro realizado com sucesso. Faça login para continuar.');
     }
 
     public function login() {
         $email = strtolower(trim($_POST['email'] ?? ''));
         $senha = $_POST['senha'] ?? '';
 
-        if(empty($email) || empty($senha)){
-            echo '
-                <!DOCTYPE html>
-                <html>
-                <head>
-                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                </head>
-                <body>
-                <script>
-                Swal.fire({
-                    title: "Erro!",
-                    text: "Preencha todos os campos!",
-                    icon: "error"
-                }).then(() => {
-                    window.history.back();
-                });
-                </script>
-                </body>
-                </html>
-            ';
-            return;
+        if (empty($email) || empty($senha)) {
+            MensagemFlash::redirecionar('../view/login.php', 'Informe seu e-mail e sua senha.', 'erro');
         }
 
-        $model = new UsuarioModel();
         $conexao = Conexao::getConexao();
 
         $stmt = $conexao->prepare("SELECT * FROM login WHERE Email = ?");
@@ -248,79 +73,69 @@ if (!preg_match('/^(?=.*[A-Za-z])(?=.*\d).{8,}$/', $senha)) {
             $_SESSION['foto'] = $resultado['foto'];
             $_SESSION['nivelAcesso'] = (int) $resultado['nivelAcesso'];
 
-            header("Location: ../view/dashboard.php");
-            exit;
-        } else {
-            echo '
-                <!DOCTYPE html>
-                <html>
-                <head>
-                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                </head>
-                <body>
-                <script>
-                Swal.fire({
-                    title: "Erro!",
-                    text: "Email ou Senha incorretos!",
-                    icon: "error"
-                }).then(() => {
-                    window.history.back();
-                });
-                </script>
-                </body>
-                </html>
-            ';
+            MensagemFlash::redirecionar('../view/dashboard.php', 'Login realizado com sucesso.');
         }
+
+        MensagemFlash::redirecionar('../view/login.php', 'E-mail ou senha incorretos', 'erro');
     }
 
     public function uploadFoto() {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+        if (!isset($_SESSION['id'])) {
+            MensagemFlash::redirecionar('../view/login.php', 'Sua sessão expirou. Entre novamente.', 'erro');
         }
-        if (isset($_SESSION['id']) && isset($_FILES['foto'])) {
-            $idUsuario = $_SESSION['id'];
-            
-            $extensao = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
-            $extensoesPermitidas = ['jpg', 'jpeg', 'png'];
-            $tiposPermitidos = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png'];
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $tipoMime = $finfo ? finfo_file($finfo, $_FILES['foto']['tmp_name']) : false;
-            if ($finfo) {
-                finfo_close($finfo);
-            }
-    
-            if (in_array($extensao, $extensoesPermitidas, true)
-                && $tipoMime === $tiposPermitidos[$extensao]
-                && $_FILES['foto']['size'] <= 5 * 1024 * 1024
-            ) {
-                $nomeFoto = bin2hex(random_bytes(16)) . "." . $extensao;
-                $diretorioDestino = __DIR__ . "/../view/img/" . $nomeFoto;
-                if (move_uploaded_file($_FILES['foto']['tmp_name'], $diretorioDestino)) {
-                    $caminhoBanco = "img/" . $nomeFoto;
-                    $conexao = Conexao::getConexao();
-                    $stmt = $conexao->prepare("UPDATE login SET foto = ? WHERE idUsuario = ?");
-                    $resultado = $stmt->execute([$caminhoBanco, $idUsuario]);
-                    if ($resultado) {
-                        $_SESSION['foto'] = $caminhoBanco;
-                        echo "
-                        <script>
-                            alert('Foto de perfil atualizada com sucesso!');
-                            window.location.href = '../view/dashboard.php';
-                        </script>
-                        ";
-                        exit;
-                    } else {
-                        echo "<script>alert('Erro ao salvar o caminho da foto no banco de dados.'); history.back();</script>";
-                    }
-                } else {
-                    echo "<script>alert('Erro ao mover o arquivo para a pasta view/img/.'); history.back();</script>";
-                }
-            } else {
-                echo "<script>alert('Extensão não permitida! Use apenas PNG, JPG ou JPEG.'); window.history.back();</script>";
-            }
-        } else {
-            echo "<script>alert('Sessão expirada ou nenhum arquivo enviado.'); window.location.href = '../view/login.php';</script>";
+
+        if (!isset($_FILES['foto']) || $_FILES['foto']['error'] !== UPLOAD_ERR_OK) {
+            MensagemFlash::redirecionar('routes.php?acao=editar', 'Selecione uma foto válida para enviar.', 'erro');
         }
+
+        $extensao = strtolower(pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION));
+        $extensoesPermitidas = ['jpg', 'jpeg', 'png'];
+        $tiposPermitidos = ['jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $tipoMime = $finfo ? finfo_file($finfo, $_FILES['foto']['tmp_name']) : false;
+        if ($finfo) {
+            finfo_close($finfo);
+        }
+
+        if (!in_array($extensao, $extensoesPermitidas, true)
+            || $tipoMime !== $tiposPermitidos[$extensao]
+            || $_FILES['foto']['size'] > 5 * 1024 * 1024
+        ) {
+            MensagemFlash::redirecionar(
+                'routes.php?acao=editar',
+                'A foto deve ser PNG, JPG ou JPEG e ter no máximo 5 MB.',
+                'erro'
+            );
+        }
+
+        $nomeFoto = bin2hex(random_bytes(16)) . '.' . $extensao;
+        $diretorioDestino = __DIR__ . '/../view/img/' . $nomeFoto;
+        if (!move_uploaded_file($_FILES['foto']['tmp_name'], $diretorioDestino)) {
+            MensagemFlash::redirecionar(
+                'routes.php?acao=editar',
+                'Não foi possível enviar a foto. Tente novamente.',
+                'erro'
+            );
+        }
+
+        $caminhoBanco = 'img/' . $nomeFoto;
+        $conexao = Conexao::getConexao();
+        $stmt = $conexao->prepare('UPDATE login SET foto = ? WHERE idUsuario = ?');
+        $resultado = $stmt->execute([$caminhoBanco, $_SESSION['id']]);
+
+        if (!$resultado) {
+            if (is_file($diretorioDestino) && !unlink($diretorioDestino)) {
+                error_log('Não foi possível remover o upload de perfil órfão: ' . $diretorioDestino);
+            }
+            MensagemFlash::redirecionar(
+                'routes.php?acao=editar',
+                'Não foi possível salvar a foto no perfil. Tente novamente.',
+                'erro'
+            );
+        }
+
+        $_SESSION['foto'] = $caminhoBanco;
+        MensagemFlash::redirecionar('routes.php?acao=editar', 'Foto de perfil atualizada com sucesso.');
     }
 
     public function mostrarEditar() {
@@ -350,53 +165,27 @@ if (!preg_match('/^(?=.*[A-Za-z])(?=.*\d).{8,}$/', $senha)) {
         $email = strtolower(trim($_POST['email'] ?? ''));
         $senha = $_POST['senha'] ?? '';
         
-        if(empty($nome) || empty($email)) {
-            echo '
-                <!DOCTYPE html>
-                <html>
-                <head>
-                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                </head>
-                <body>
-                <script>
-                Swal.fire({
-                    title: "Erro!",
-                    text: "Nome e email são obrigatórios!",
-                    icon: "error"
-                }).then(() => {
-                    window.history.back();
-                });
-                </script>
-                </body>
-                </html>
-            ';
-            return;
+        if (empty($nome) || empty($email)) {
+            MensagemFlash::redirecionar('routes.php?acao=editar', 'Nome e e-mail são obrigatórios.', 'erro');
         }
 
-        if(!empty($senha) && (
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            MensagemFlash::redirecionar('routes.php?acao=editar', 'Informe um endereço de e-mail válido.', 'erro');
+        }
+
+        if (strlen($nome) > 50) {
+            MensagemFlash::redirecionar('routes.php?acao=editar', 'O nome deve ter no máximo 50 caracteres.', 'erro');
+        }
+
+        if (!empty($senha) && (
             strlen($senha) < 8
             || !preg_match('/^(?=.*[A-Za-z])(?=.*\d).{8,}$/', $senha)
-        )){
-            echo '
-                <!DOCTYPE html>
-                <html>
-                <head>
-                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-                </head>
-                <body>
-                <script>
-                Swal.fire({
-                    title: "Erro!",
-                    text: "A senha deve conter letras e números e ter no mínimo 8 caracteres!",
-                    icon: "error"
-                }).then(() => {
-                    window.history.back();
-                });
-                </script>
-                </body>
-                </html>
-            ';
-            return;
+        )) {
+            MensagemFlash::redirecionar(
+                'routes.php?acao=editar',
+                'A nova senha deve conter letras e números e ter no mínimo 8 caracteres.',
+                'erro'
+            );
         }
         
         $model = new UsuarioModel();
@@ -408,25 +197,7 @@ if (!preg_match('/^(?=.*[A-Za-z])(?=.*\d).{8,}$/', $senha)) {
         }
         
         $_SESSION['nomeUsuario'] = $nome;
-        echo '
-            <!DOCTYPE html>
-            <html>
-            <head>
-            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-            </head>
-            <body>
-            <script>
-            Swal.fire({
-                title: "Sucesso!",
-                text: "Dados atualizados com sucesso!",
-                icon: "success"
-            }).then(() => {
-                window.location.href = "../view/dashboard.php";
-            });
-            </script>
-            </body>
-            </html>
-        ';
+        MensagemFlash::redirecionar('../view/dashboard.php', 'Dados do perfil atualizados com sucesso.');
     }
 
     public function excluir() {
@@ -436,32 +207,18 @@ if (!preg_match('/^(?=.*[A-Za-z])(?=.*\d).{8,}$/', $senha)) {
         $id = $_SESSION['id'];
         $model = new UsuarioModel();
         $model->excluir($id);
-        session_destroy();
-        echo '
-            <!DOCTYPE html>
-            <html>
-            <head>
-            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-            </head>
-            <body>
-            <script>
-            Swal.fire({
-                title: "Conta removida!",
-                text: "Sua conta foi excluída com sucesso!",
-                icon: "success"
-            }).then(() => {
-                window.location.href = "../view/cadastro.php";
-            });
-            </script>
-            </body>
-            </html>
-        ';
+        $_SESSION = [];
+        session_regenerate_id(true);
+        MensagemFlash::redirecionar('../view/cadastro.php', 'Sua conta foi excluída com sucesso.');
     }
 
     public function logout() {
-        session_start();
-        session_destroy();
-        header('Location: ../view/login.php');
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $_SESSION = [];
+        session_regenerate_id(true);
+        MensagemFlash::redirecionar('../view/login.php', 'Você saiu da sua conta com segurança.');
     }
 }
 ?>

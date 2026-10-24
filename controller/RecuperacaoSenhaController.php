@@ -2,6 +2,7 @@
 
 require_once '../model/RecuperacaoSenhaModel.php';
 require_once '../vendor/autoload.php';
+require_once '../model/MensagemFlash.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -13,13 +14,11 @@ class RecuperacaoSenhaController
         $email = strtolower(trim($_POST['email'] ?? ''));
 
         if (empty($email)) {
-            echo "Informe seu e-mail.";
-            return;
+            MensagemFlash::redirecionar('../view/esqueceuSenha.php', 'Informe o e-mail da sua conta.', 'erro');
         }
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            echo "Formato de e-mail inválido.";
-            return;
+            MensagemFlash::redirecionar('../view/esqueceuSenha.php', 'Informe um endereço de e-mail válido.', 'erro');
         }
 
         $model = new RecuperacaoSenhaModel();
@@ -28,8 +27,10 @@ class RecuperacaoSenhaController
 
         // Não revela se o e-mail existe ou não.
         if (!$usuario) {
-            echo "Se o e-mail estiver cadastrado, você receberá um link para redefinir sua senha.";
-            return;
+            MensagemFlash::redirecionar(
+                '../view/login.php',
+                'Se o e-mail estiver cadastrado, você receberá as instruções para redefinir sua senha.'
+            );
         }
 
         // Gera um token aleatório.
@@ -51,8 +52,11 @@ class RecuperacaoSenhaController
         );
 
         if (!$salvou) {
-            echo "Não foi possível iniciar a recuperação da senha.";
-            return;
+            MensagemFlash::redirecionar(
+                '../view/esqueceuSenha.php',
+                'Não foi possível iniciar a recuperação agora. Tente novamente.',
+                'erro'
+            );
         }
 
         // Configurações do e-mail e URL do sistema.
@@ -130,17 +134,19 @@ class RecuperacaoSenhaController
             // Envia o e-mail.
             $mail->send();
 
-            echo "
-                <script>
-                    alert('Se o e-mail estiver cadastrado, você receberá um link para redefinir sua senha.');
-                    window.location.href = '../view/login.php';
-                </script>
-            ";
+            MensagemFlash::redirecionar(
+                '../view/login.php',
+                'Se o e-mail estiver cadastrado, você receberá as instruções para redefinir sua senha.'
+            );
 
         } catch (Exception $e) {
 
             error_log('Falha no envio de recuperação de senha: ' . $mail->ErrorInfo);
-            echo "Não foi possível enviar o e-mail no momento.";
+            MensagemFlash::redirecionar(
+                '../view/esqueceuSenha.php',
+                'Não foi possível enviar o e-mail agora. Tente novamente mais tarde.',
+                'erro'
+            );
         }
     }
 
@@ -150,8 +156,11 @@ class RecuperacaoSenhaController
         $token = $_GET['token'] ?? '';
 
         if (empty($token)) {
-            echo "Token inválido.";
-            return;
+            MensagemFlash::redirecionar(
+                '../view/esqueceuSenha.php',
+                'O link de redefinição é inválido ou está incompleto.',
+                'erro'
+            );
         }
 
         // Calcula o hash do token recebido.
@@ -163,8 +172,11 @@ class RecuperacaoSenhaController
         $dadosToken = $model->buscarTokenValido($tokenHash);
 
         if (!$dadosToken) {
-            echo "Este link é inválido ou expirou.";
-            return;
+            MensagemFlash::redirecionar(
+                '../view/esqueceuSenha.php',
+                'Este link de redefinição é inválido ou expirou. Solicite um novo link.',
+                'erro'
+            );
         }
 
         // Abre o formulário para criar uma nova senha.
@@ -177,26 +189,32 @@ class RecuperacaoSenhaController
         $token = $_POST['token'] ?? '';
         $senha = $_POST['senha'] ?? '';
         $confirmarSenha = $_POST['confirmarSenha'] ?? '';
+        $destinoRedefinicao = 'routes.php?acao=mostrarRedefinicao&token=' . urlencode($token);
 
         if (
             empty($token) ||
             empty($senha) ||
             empty($confirmarSenha)
         ) {
-            echo "Preencha todos os campos.";
-            return;
+            MensagemFlash::redirecionar(
+                $destinoRedefinicao,
+                'Preencha todos os campos para redefinir sua senha.',
+                'erro'
+            );
         }
 
         // Verifica se as senhas são iguais.
         if ($senha !== $confirmarSenha) {
-            echo "As senhas não coincidem.";
-            return;
+            MensagemFlash::redirecionar($destinoRedefinicao, 'As senhas informadas não coincidem.', 'erro');
         }
 
         // Exige pelo menos 8 caracteres.
         if (strlen($senha) < 8 || !preg_match('/^(?=.*[A-Za-z])(?=.*\d).{8,}$/', $senha)) {
-            echo "A senha deve conter letras e números e ter pelo menos 8 caracteres.";
-            return;
+            MensagemFlash::redirecionar(
+                $destinoRedefinicao,
+                'A senha deve conter letras e números e ter pelo menos 8 caracteres.',
+                'erro'
+            );
         }
 
         // Calcula novamente o hash do token.
@@ -208,8 +226,11 @@ class RecuperacaoSenhaController
         $dadosToken = $model->buscarTokenValido($tokenHash);
 
         if (!$dadosToken) {
-            echo "Este link é inválido ou expirou.";
-            return;
+            MensagemFlash::redirecionar(
+                '../view/esqueceuSenha.php',
+                'Este link de redefinição é inválido ou expirou. Solicite um novo link.',
+                'erro'
+            );
         }
 
         // Cria um hash seguro para a nova senha.
@@ -225,8 +246,11 @@ class RecuperacaoSenhaController
         );
 
         if (!$atualizou) {
-            echo "Não foi possível alterar a senha.";
-            return;
+            MensagemFlash::redirecionar(
+                $destinoRedefinicao,
+                'Não foi possível alterar a senha agora. Tente novamente.',
+                'erro'
+            );
         }
 
         // Invalida o token para impedir reutilização.
@@ -234,12 +258,7 @@ class RecuperacaoSenhaController
             $dadosToken['id']
         );
 
-        echo "
-            <script>
-                alert('Senha alterada com sucesso!');
-                window.location.href = '../view/login.php';
-            </script>
-        ";
+        MensagemFlash::redirecionar('../view/login.php', 'Senha alterada com sucesso. Faça login com a nova senha.');
     }
 }
 ?>

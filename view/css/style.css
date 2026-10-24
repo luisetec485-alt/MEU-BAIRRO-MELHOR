@@ -123,6 +123,169 @@ body {
     border: 2px solid rgba(41, 65, 38, 0.6);
 }
 
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    width: 100%;
+    margin: -20px -20px 24px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(12px);
+}
+
+.auth-page .site-header {
+    margin-top: -28px;
+}
+
+.site-brand {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-main);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.site-brand img {
+    display: block;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.site-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.site-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.site-nav a:hover,
+.site-nav a:focus-visible {
+    background: #eef3ef;
+    color: #1f4d36;
+}
+
+.site-nav .site-nav-logout {
+    color: #b42318;
+}
+
+.site-footer {
+    align-self: stretch;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px 24px;
+    width: 100%;
+    margin: auto -20px -30px;
+    padding: 20px;
+    border-top: 1px solid var(--border-color);
+    background: #fff;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.auth-page .site-footer {
+    margin-bottom: -40px;
+}
+
+.site-footer p {
+    margin: 0;
+}
+
+.site-footer a {
+    color: #1f4d36;
+    font-weight: 600;
+}
+
+.flash-message {
+    align-self: center;
+    width: min(100%, 1000px);
+    margin: 0 auto 20px;
+    padding: 14px 18px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.flash-message-sucesso {
+    border-color: #a7d7b5;
+    background: #edf8f0;
+    color: #1f6334;
+}
+
+.flash-message-erro {
+    border-color: #f1b6b6;
+    background: #fff1f1;
+    color: #9f2525;
+}
+
+.login-links {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.link-senha {
+    display: inline-block;
+    color: #3b82f6;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.link-senha:hover {
+    color: #2563eb;
+    text-decoration: underline;
+    transform: translateX(2px);
+}
+
+.privacy-content {
+    max-width: 900px;
+    margin: 0 auto 32px;
+}
+
+.privacy-content h3 {
+    margin: 24px 0 8px;
+    color: #1f4d36;
+}
+
+.privacy-content p,
+.privacy-content ul {
+    margin-bottom: 12px;
+}
+
+.privacy-content ul {
+    padding-left: 24px;
+}
+
 .auth-page .fixed-logo {
     position: relative;
     top: auto;
@@ -490,6 +653,49 @@ a.btn-block,
    ========================================================================== */
 @media (max-width: 768px) {
     body { padding: 15px; }
+
+    .site-header {
+        top: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        margin: -15px -15px 20px;
+        padding: 10px 15px;
+    }
+
+    .auth-page .site-header {
+        margin-top: -28px;
+        margin-right: -20px;
+        margin-left: -20px;
+    }
+
+    .site-brand {
+        justify-content: center;
+    }
+
+    .site-nav {
+        justify-content: center;
+        gap: 3px;
+    }
+
+    .site-nav a {
+        min-height: 36px;
+        padding: 7px 8px;
+        font-size: 0.82rem;
+    }
+
+    .site-footer {
+        gap: 8px 16px;
+        margin-right: -15px;
+        margin-bottom: -30px;
+        margin-left: -15px;
+        padding: 18px 15px;
+    }
+
+    .auth-page .site-footer {
+        margin-right: -20px;
+        margin-left: -20px;
+    }
 
     .fixed-logo {
         position: relative;

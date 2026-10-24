@@ -1,17 +1,10 @@
-<?php require_once __DIR__.'/../model/Seguranca.php'; Seguranca::iniciarSessao(); ?>
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro - Meu Bairro Melhor</title>
-    <link rel="stylesheet" href="../view/css/style.css?v=<?= time() ?>">
-</head>
-<body class="auth-page">
-
-<div class="fixed-logo">
-    <img src="../view/img/logo.png" alt="Logo Meu Bairro Melhor">
-</div>
+<?php
+require_once __DIR__.'/../model/Seguranca.php';
+Seguranca::iniciarSessao();
+$pageTitle = 'Cadastro - Meu Bairro Melhor';
+$bodyClass = 'auth-page';
+include __DIR__ . '/header.php';
+?>
 
 <section class="screen">
     <div class="dashboard-container max-width-small">
@@ -52,5 +45,4 @@
     </div>
 </section>
 
-</body>
-</html>
+<?php include __DIR__ . '/footer.php'; ?>

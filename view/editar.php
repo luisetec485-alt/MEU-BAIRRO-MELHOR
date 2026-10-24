@@ -1,25 +1,16 @@
 <?php
 require_once __DIR__.'/../model/Seguranca.php';
-Seguranca::iniciarSessao();
+Seguranca::exigirLogin();
 $usuario = $usuario ?? [
     'idUsuario' => $_SESSION['id'] ?? '',
     'nomeUsuario' => $_SESSION['nomeUsuario'] ?? '',
     'Email' => $_SESSION['Email'] ?? ''
 ];
 ?>
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editar Usuário - Meu Bairro Melhor</title>
-    <link rel="stylesheet" href="../view/css/style.css?v=<?= time() ?>">
-</head>
-<body>
-
-<div class="fixed-logo">
-    <img src="../view/img/logo.png" alt="Logo Meu Bairro Melhor">
-</div>
+<?php
+$pageTitle = 'Editar Usuário - Meu Bairro Melhor';
+include __DIR__ . '/header.php';
+?>
 
 <section class="screen">
     <div class="dashboard-container max-width-small">
@@ -83,5 +74,4 @@ $usuario = $usuario ?? [
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-</body>
-</html>
+<?php include __DIR__ . '/footer.php'; ?>
