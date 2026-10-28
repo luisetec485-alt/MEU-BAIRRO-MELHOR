@@ -7,7 +7,6 @@ $pageTitle = $pageTitle ?? 'Problemas Registrados - Meu Bairro Melhor';
 $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
 $inController = strpos($scriptName, '/controller/') !== false;
 $cssHref = $inController ? '../view/css/style.css?v=' . time() : 'css/style.css?v=' . time();
-$logoSrc = $inController ? '../view/img/logo.png' : 'img/logo.png';
 $viewBase = $inController ? '../view/' : '';
 $routeBase = '../controller/routes.php?acao=';
 $nomeUsuario = trim((string) ($_SESSION['nomeUsuario'] ?? 'Usuário'));
@@ -30,7 +29,6 @@ $mensagemFlash = MensagemFlash::consumir();
 
 <header class="site-header">
     <a class="site-brand" href="<?= $routeBase ?>dashboard">
-        <img src="<?= htmlspecialchars($logoSrc, ENT_QUOTES, 'UTF-8') ?>" alt="">
         <span>Meu Bairro Melhor</span>
     </a>
 

@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
 if (isset($_SESSION['id'])) {
     header("Location: view/dashboard.php");
 } else {
-    header("Location: view/login.php");
+    header("Location: view/inicio.php");
 }
 exit;
 ?>
