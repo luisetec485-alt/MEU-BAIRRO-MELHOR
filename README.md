@@ -1,92 +1,58 @@
 # Meu Bairro Melhor
 
-## Nome do grupo
-
-**Meu Bairro Melhor (MBM)**
-
-O projeto é uma aplicação web para registro e acompanhamento de problemas do
-bairro, com perfis de administrador e usuário comum.
+Aplicação web para registrar e acompanhar problemas urbanos em Franco da Rocha.
+Moradores podem enviar denúncias com localização e anexos; administradores
+consultam e atualizam o andamento dos registros.
 
 ## Requisitos
 
-- PHP com as extensões PDO e `pdo_mysql` habilitadas;
+- PHP com PDO e `pdo_mysql`;
 - MySQL ou MariaDB;
-- Apache (por exemplo, o Apache do XAMPP);
-- Composer, caso seja necessário reinstalar as dependências.
+- Apache (por exemplo, o XAMPP).
 
-As dependências PHP já estão disponíveis no diretório `vendor/`. Para
-reinstalá-las, execute:
+## Instalação
+
+1. Coloque o projeto na pasta `htdocs` do XAMPP.
+2. Inicie o Apache e o MySQL.
+3. Importe [`database/MBM.sql`](database/MBM.sql) pelo phpMyAdmin ou pelo terminal:
+
+   ```powershell
+   mysql -u root -p -P 3307 < database\MBM.sql
+   ```
+
+   **Atenção:** o script apaga e recria o banco `MBM`. Não o execute sobre um
+   banco que contenha dados que você queira manter.
+
+4. Acesse <http://localhost/MEU-BAIRRO-MELHOR/>.
+
+O Composer é necessário apenas para instalar ou restaurar dependências:
 
 ```powershell
 composer install
 ```
 
-## Como importar o banco de dados
+## Banco de dados
 
-O script completo está em [`database/MBM.sql`](database/MBM.sql). Ele recria o
-banco `MBM`, portanto apaga um banco existente com esse mesmo nome.
+A aplicação usa estas configurações padrão:
 
-### Opção 1: phpMyAdmin
+- `DB_HOST`: `localhost`
+- `DB_PORT`: `3307`
+- `DB_NAME`: `MBM`
+- `DB_USER`: `root`
+- `DB_PASS`: vazio
 
-1. Inicie o Apache e o MySQL no XAMPP.
-2. Acesse `http://localhost/phpmyadmin`.
-3. Abra a opção **Importar**.
-4. Selecione o arquivo `database/MBM.sql`.
-5. Clique em **Importar** e aguarde a conclusão.
+Defina as variáveis de ambiente para usar valores diferentes.
 
-### Opção 2: terminal
+## Contas de demonstração
 
-Com o cliente MySQL instalado, execute na raiz do projeto:
+O banco inclui contas para testar os perfis de administrador e morador:
 
-```powershell
-mysql -u root -p -P 3307 < database\MBM.sql
-```
+- **Administrador**
+  - E-mail: `admin@meubairromelhor.com`
+  - Senha: `Admin@2026`
+- **Morador**
+  - E-mail: `leitor@meubairromelhor.com`
+  - Senha: `Leitor@2026`
 
-Quando o usuário `root` não tiver senha, pressione `Enter` quando solicitado.
-Se o MySQL estiver usando a porta padrão `3306`, troque `3307` pelo número da
-porta configurada no seu ambiente.
-
-## Configuração da conexão
-
-Por padrão, a aplicação tenta conectar usando:
-
-| Configuração | Valor padrão |
-| --- | --- |
-| Host | `localhost` |
-| Porta | `3306` |
-| Banco | `MBM` |
-| Usuário | `root` |
-| Senha | vazia |
-
-Esses valores podem ser substituídos pelas variáveis de ambiente
-`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` e `DB_PASS`.
-
-## Como executar
-
-Com o projeto dentro da pasta `htdocs` do XAMPP, inicie Apache e MySQL e
-acesse:
-
-```text
-http://localhost/MEU-BAIRRO-MELHOR/
-```
-
-Se preferir usar o servidor embutido do PHP, execute na raiz do projeto:
-
-```powershell
-php -S localhost:8000
-```
-
-Depois, acesse `http://localhost:8000`.
-
-## Logins de teste
-
-O dump já insere as contas abaixo. O nível `0` corresponde a administrador e o
-nível `1` corresponde a usuário comum.
-
-| Perfil | E-mail | Senha |
-| --- | --- | --- |
-| Administrador | `admin@meubairromelhor.com` | `Admin@2026` |
-| Usuário comum | `leitor@meubairromelhor.com` | `Leitor@2026` |
-
-Por segurança, altere essas senhas em ambientes que não sejam de teste.
-
+Essas contas são apenas para desenvolvimento e demonstração. Troque as senhas
+antes de disponibilizar o sistema em outro ambiente.

@@ -9,6 +9,10 @@ include __DIR__ . '/header.php';
 <section class="screen">
     <div class="dashboard-container max-width-small">
         <div class="welcome-box">
+            <a href="inicio.php" class="auth-back-link">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6M9 12h12"/></svg>
+                Voltar
+            </a>
             <h2>Cadastro de Usuário</h2>
             <p>Crie sua conta para começar a ajudar seu bairro.</p>
 

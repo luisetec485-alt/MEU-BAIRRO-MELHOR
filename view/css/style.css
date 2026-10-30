@@ -719,6 +719,8 @@ h1, h2, h3, h4 {
 }
 
 .flash-message {
+    position: relative;
+    overflow: hidden;
     align-self: center;
     display: flex;
     align-items: center;
@@ -731,6 +733,56 @@ h1, h2, h3, h4 {
     font-weight: 600;
     box-shadow: var(--shadow-md);
     animation: mbm-aparecer 0.35s ease-out;
+}
+
+.flash-message::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    content: "";
+    background: currentColor;
+    opacity: 0.35;
+    transform: scaleX(1);
+    transform-origin: left;
+    animation: mbm-contagem-regressiva var(--flash-duration, 6s) linear forwards;
+}
+
+.flash-message-paused::after {
+    animation-play-state: paused;
+}
+
+.flash-message-closing {
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+@keyframes mbm-contagem-regressiva {
+    to { transform: scaleX(0); }
+}
+
+.flash-message-dismiss {
+    flex: 0 0 auto;
+    margin-left: auto;
+    padding: 5px 8px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.flash-message-dismiss:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.flash-message-dismiss:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
 }
 
 .flash-message::before {
@@ -877,6 +929,35 @@ h1, h2, h3, h4 {
     border-radius: 28px;
     padding: 40px 36px 30px;
     box-shadow: 0 30px 60px -30px rgba(16, 36, 26, 0.35), 0 10px 20px -15px rgba(16, 36, 26, 0.2);
+}
+
+.auth-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    color: var(--brand-900);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.auth-back-link svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.auth-back-link:hover {
+    color: var(--color-green-hover);
+}
+
+.auth-back-link:focus-visible {
+    outline: 2px solid var(--color-green);
+    outline-offset: 4px;
 }
 
 /* faixa verde no topo do cartão de login/cadastro */

@@ -139,31 +139,6 @@ $pageTitle = ($usuarioEhAdmin ? 'Denúncias registradas' : 'Minhas denúncias') 
 
             </form>
 
-            <!-- Raio a partir da sua localização: filtra no mapa e na tabela os resultados acima -->
-            <div class="filtros-container filtros-raio">
-
-                <label class="sr-only" for="raioBusca">Raio da busca em quilômetros</label>
-                <input
-                    type="number"
-                    id="raioBusca"
-                    min="0.1"
-                    max="100"
-                    step="0.1"
-                    placeholder="Raio em km"
-                    title="Mostrar só as ocorrências dentro deste raio"
-                    oninput="filtrarProblemas()"
-                >
-
-                <button
-                    type="button"
-                    class="btn-blue"
-                    onclick="usarMinhaLocalizacao()"
-                >
-                    Usar minha localização
-                </button>
-
-            </div>
-
             <p class="resultado-consulta" role="status">
                 <?php if ($totalEncontrado === 0 && $filtrosAtivos): ?>
                     Nenhuma denúncia encontrada com esses filtros. Tente outras palavras ou clique em "Limpar filtros".
@@ -177,11 +152,8 @@ $pageTitle = ($usuarioEhAdmin ? 'Denúncias registradas' : 'Minhas denúncias') 
             <div
                 id="mapa-ocorrencias"
                 class="map-container"
-                aria-label="Mapa com as ocorrências cadastradas"
+                aria-label="Mapa de Franco da Rocha. Clique nos marcadores para consultar as denúncias."
             ></div>
-
-            <p id="mensagemLocalizacao" class="text-muted"></p>
-
 
             <!-- TABELA -->
 
@@ -503,13 +475,14 @@ const ocorrencias = <?= json_encode(array_map(static function ($problema) {
     ];
 }, $problemas), JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
-const marcadores = [];
-let pontoBusca = null;
-
 // Se o Leaflet não carregar (sem internet), a página continua funcionando sem o mapa.
 const mapaDisponivel = typeof L !== 'undefined';
 const mapOcorrencias = mapaDisponivel
-    ? L.map('mapa-ocorrencias').setView([-23.3215, -46.7285], 13)
+    ? L.map('mapa-ocorrencias', {
+        maxBoundsViscosity: 1.0,
+        minZoom: 11,
+        maxZoom: 18
+    }).setView([-23.3215, -46.7285], 13)
     : null;
 
 if (mapaDisponivel) {
@@ -517,18 +490,50 @@ if (mapaDisponivel) {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(mapOcorrencias);
 
-    ocorrencias.forEach(function (ocorrencia) {
-        const marcador = L.marker([ocorrencia.latitude, ocorrencia.longitude])
-            .addTo(mapOcorrencias)
-            .bindPopup(
-                '<strong>' + escapeHtml(ocorrencia.codigo) + '</strong><br>' +
-                escapeHtml(ocorrencia.titulo) + '<br>' +
-                escapeHtml(ocorrencia.categoria) + '<br>' +
-                escapeHtml(ocorrencia.status === 'enviado' ? 'Enviado' : 'Aguardando encaminhamento')
-            );
+    fetch('../view/assets/geo/franco-da-rocha.geojson')
+        .then(function (resposta) {
+            if (!resposta.ok) {
+                throw new Error('Não foi possível carregar o limite de Franco da Rocha.');
+            }
+            return resposta.json();
+        })
+        .then(function (geojson) {
+            const limiteFrancoDaRocha = L.geoJSON(geojson, {
+                filter: function (feature) {
+                    return String(feature.properties.CD_MUN) === '3516408';
+                },
+                style: {
+                    color: '#2563eb',
+                    weight: 2,
+                    fillColor: '#3b82f6',
+                    fillOpacity: 0.12
+                }
+            }).addTo(mapOcorrencias);
 
-        marcadores.push({ marcador: marcador, ocorrencia: ocorrencia });
-    });
+            const limites = limiteFrancoDaRocha.getBounds();
+            if (!limites.isValid()) {
+                throw new Error('O limite de Franco da Rocha não está disponível.');
+            }
+
+            mapOcorrencias.setMaxBounds(limites);
+            mapOcorrencias.fitBounds(limites);
+
+            ocorrencias.forEach(function (ocorrencia) {
+                const marcador = L.marker([ocorrencia.latitude, ocorrencia.longitude])
+                    .addTo(mapOcorrencias)
+                    .bindPopup(
+                        '<strong>' + escapeHtml(ocorrencia.codigo) + '</strong><br>' +
+                        escapeHtml(ocorrencia.titulo) + '<br>' +
+                        escapeHtml(ocorrencia.categoria) + '<br>' +
+                        escapeHtml(ocorrencia.status === 'enviado' ? 'Enviado' : 'Aguardando encaminhamento')
+                    );
+
+            });
+        })
+        .catch(function (erro) {
+            document.getElementById('mapa-ocorrencias').textContent =
+                erro.message || 'Não foi possível carregar o limite de Franco da Rocha.';
+        });
 } else {
     document.getElementById('mapa-ocorrencias').textContent = 'Não foi possível carregar o mapa agora.';
 }
@@ -543,84 +548,6 @@ function escapeHtml(valor) {
             '"': '&quot;'
         }[caractere];
     });
-}
-
-function distanciaEmKm(lat1, lng1, lat2, lng2) {
-    const raioTerra = 6371;
-    const diferencaLat = (lat2 - lat1) * Math.PI / 180;
-    const diferencaLng = (lng2 - lng1) * Math.PI / 180;
-    const valor = Math.sin(diferencaLat / 2) ** 2 +
-        Math.cos(lat1 * Math.PI / 180) *
-        Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(diferencaLng / 2) ** 2;
-
-    return raioTerra * 2 * Math.atan2(Math.sqrt(valor), Math.sqrt(1 - valor));
-}
-
-function usarMinhaLocalizacao() {
-    if (!navigator.geolocation) {
-        document.getElementById('mensagemLocalizacao').textContent =
-            'Este navegador não oferece geolocalização.';
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(function (posicao) {
-        pontoBusca = {
-            latitude: posicao.coords.latitude,
-            longitude: posicao.coords.longitude
-        };
-
-        if (mapOcorrencias) {
-            mapOcorrencias.setView(
-                [pontoBusca.latitude, pontoBusca.longitude],
-                14
-            );
-        }
-
-        document.getElementById('mensagemLocalizacao').textContent =
-            'Localização obtida. Informe um raio para filtrar as ocorrências.';
-        filtrarProblemas();
-    }, function () {
-        document.getElementById('mensagemLocalizacao').textContent =
-            'Não foi possível obter sua localização.';
-    });
-}
-
-// Texto, categoria, subcategoria, status, prioridade e bairro são filtrados
-// no banco (formulário acima). Aqui só aplicamos o raio a partir da
-// localização do usuário, sobre os resultados que já vieram do banco.
-function filtrarProblemas() {
-
-    const raio = Number(document.getElementById('raioBusca').value);
-
-    function dentroDoRaio(latitude, longitude) {
-        return !pontoBusca || !raio ||
-            distanciaEmKm(pontoBusca.latitude, pontoBusca.longitude, latitude, longitude) <= raio;
-    }
-
-    let visiveis = 0;
-
-    document.querySelectorAll('.linha-problema').forEach(function (linha) {
-        const mostrar = dentroDoRaio(Number(linha.dataset.latitude), Number(linha.dataset.longitude));
-        linha.style.display = mostrar ? '' : 'none';
-        if (mostrar) {
-            visiveis++;
-        }
-    });
-
-    marcadores.forEach(function (item) {
-        if (dentroDoRaio(item.ocorrencia.latitude, item.ocorrencia.longitude)) {
-            item.marcador.addTo(mapOcorrencias);
-        } else {
-            mapOcorrencias.removeLayer(item.marcador);
-        }
-    });
-
-    if (pontoBusca && raio) {
-        document.getElementById('mensagemLocalizacao').textContent = visiveis === 0
-            ? 'Nenhuma denúncia dentro de ' + raio + ' km da sua localização.'
-            : visiveis + ' denúncia(s) dentro de ' + raio + ' km da sua localização.';
-    }
 }
 
 // Esconde, no filtro, as subcategorias que não pertencem à categoria
