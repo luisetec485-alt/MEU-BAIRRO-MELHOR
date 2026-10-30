@@ -42,6 +42,7 @@ include __DIR__ . '/header.php';
                         name="senha"
                         autocomplete="new-password"
                         minlength="8"
+                        maxlength="255"
                         required
                     >
 
@@ -59,6 +60,7 @@ include __DIR__ . '/header.php';
                         name="confirmarSenha"
                         autocomplete="new-password"
                         minlength="8"
+                        maxlength="255"
                         required
                     >
 

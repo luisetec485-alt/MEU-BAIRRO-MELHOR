@@ -21,12 +21,12 @@ include __DIR__ . '/header.php';
                 
                 <div class="form-group">
                     <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" autocomplete="email" required>
+                    <input type="email" id="email" name="email" autocomplete="email" maxlength="100" required>
                 </div>
 
                 <div class="form-group">
                     <label for="senha">Senha:</label>
-                    <input type="password" id="senha" name="senha" autocomplete="current-password" required>
+                    <input type="password" id="senha" name="senha" autocomplete="current-password" maxlength="255" required>
                 </div>
 
                 <button type="submit" class="btn-green btn-block">Entrar</button>

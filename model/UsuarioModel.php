@@ -4,6 +4,7 @@ require_once 'Conexao.php';
 
 class UsuarioModel
 {
+    private static $tabelaTentativasLoginCriada = false;
 
     public function cadastrar($nome, $email, $senha)
     {
@@ -41,6 +42,132 @@ class UsuarioModel
 
         return [];
     }
+
+    public function obterBloqueioLogin($email, $ip)
+    {
+        $conexao = Conexao::getConexao();
+        $chave = $this->chaveTentativaLogin($email, $ip);
+        $this->garantirTabelaTentativasLogin($conexao);
+
+        $stmt = $conexao->prepare(
+            "SELECT bloqueado_ate
+             FROM login_tentativas
+             WHERE chave = ? AND bloqueado_ate > NOW()"
+        );
+        $stmt->execute([$chave]);
+        $bloqueadoAte = $stmt->fetchColumn();
+
+        if ($bloqueadoAte !== false) {
+            return $bloqueadoAte;
+        }
+
+        $stmt = $conexao->prepare(
+            "UPDATE login_tentativas
+             SET tentativas = 0, bloqueado_ate = NULL
+             WHERE chave = ? AND bloqueado_ate IS NOT NULL AND bloqueado_ate <= NOW()"
+        );
+        $stmt->execute([$chave]);
+
+        return null;
+    }
+
+    public function registrarFalhaLogin($email, $ip)
+    {
+        $conexao = Conexao::getConexao();
+        $chave = $this->chaveTentativaLogin($email, $ip);
+        $this->garantirTabelaTentativasLogin($conexao);
+        $conexao->beginTransaction();
+
+        try {
+            $stmt = $conexao->prepare(
+                "INSERT IGNORE INTO login_tentativas (chave, tentativas)
+                 VALUES (?, 0)"
+            );
+            $stmt->execute([$chave]);
+
+            $stmt = $conexao->prepare(
+                "SELECT tentativas, bloqueado_ate
+                 FROM login_tentativas
+                 WHERE chave = ?
+                 FOR UPDATE"
+            );
+            $stmt->execute([$chave]);
+            $tentativa = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($tentativa['bloqueado_ate'] !== null
+                && strtotime($tentativa['bloqueado_ate']) > time()
+            ) {
+                $conexao->commit();
+                return $tentativa['bloqueado_ate'];
+            }
+
+            $quantidade = (int) $tentativa['tentativas'] + 1;
+            if ($quantidade >= 5) {
+                $stmt = $conexao->prepare(
+                    "UPDATE login_tentativas
+                     SET tentativas = 0, bloqueado_ate = DATE_ADD(NOW(), INTERVAL 15 MINUTE)
+                     WHERE chave = ?"
+                );
+                $stmt->execute([$chave]);
+
+                $stmt = $conexao->prepare(
+                    "SELECT bloqueado_ate FROM login_tentativas WHERE chave = ?"
+                );
+                $stmt->execute([$chave]);
+                $bloqueadoAte = $stmt->fetchColumn();
+            } else {
+                $stmt = $conexao->prepare(
+                    "UPDATE login_tentativas
+                     SET tentativas = ?, bloqueado_ate = NULL
+                     WHERE chave = ?"
+                );
+                $stmt->execute([$quantidade, $chave]);
+                $bloqueadoAte = null;
+            }
+
+            $conexao->commit();
+            return $bloqueadoAte;
+        } catch (Throwable $erro) {
+            if ($conexao->inTransaction()) {
+                $conexao->rollBack();
+            }
+            throw $erro;
+        }
+    }
+
+    public function limparTentativasLogin($email, $ip)
+    {
+        $conexao = Conexao::getConexao();
+        $chave = $this->chaveTentativaLogin($email, $ip);
+        $this->garantirTabelaTentativasLogin($conexao);
+
+        $stmt = $conexao->prepare(
+            "DELETE FROM login_tentativas WHERE chave = ?"
+        );
+        $stmt->execute([$chave]);
+    }
+
+    private function chaveTentativaLogin($email, $ip)
+    {
+        return hash('sha256', strtolower(trim((string) $email)) . "\0" . (string) $ip);
+    }
+
+    private function garantirTabelaTentativasLogin($conexao)
+    {
+        if (self::$tabelaTentativasLoginCriada) {
+            return;
+        }
+
+        $conexao->exec(
+            "CREATE TABLE IF NOT EXISTS login_tentativas (
+                chave CHAR(64) NOT NULL PRIMARY KEY,
+                tentativas TINYINT UNSIGNED NOT NULL DEFAULT 0,
+                bloqueado_ate DATETIME DEFAULT NULL
+            ) ENGINE=InnoDB"
+        );
+        self::$tabelaTentativasLoginCriada = true;
+    }
+
     public function buscarPorId($id)
     {
         $conexao = Conexao::getConexao();

@@ -37,6 +37,32 @@ class SubcategoriaModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function listarComDenuncias($usuarioId = null) {
+
+        $conexao = Conexao::getConexao();
+
+        $sql = "SELECT DISTINCT
+                    s.*,
+                    c.nome AS categoriaNome
+                FROM subcategorias s
+                INNER JOIN categorias c
+                    ON s.categoriaid = c.id
+                INNER JOIN problemas p
+                    ON p.subcategoriaid = s.id";
+        $parametros = [];
+
+        if ($usuarioId !== null) {
+            $sql .= ' WHERE p.usuarioid = ?';
+            $parametros[] = (int) $usuarioId;
+        }
+
+        $sql .= ' ORDER BY s.nome ASC';
+        $stmt = $conexao->prepare($sql);
+        $stmt->execute($parametros);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function buscarPorCategoria($categoriaid) {
 
         $conexao = Conexao::getConexao();

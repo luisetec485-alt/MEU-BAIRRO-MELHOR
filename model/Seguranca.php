@@ -2,6 +2,8 @@
 
 class Seguranca
 {
+    private const TEMPO_INATIVIDADE = 900;
+
     public static function iniciarSessao()
     {
         if (session_status() === PHP_SESSION_NONE) {
@@ -15,6 +17,24 @@ class Seguranca
                 'samesite' => 'Lax'
             ]);
             session_start();
+        }
+
+        if (isset($_SESSION['id'])) {
+            $agora = time();
+            $ultimaAtividade = $_SESSION['ultimaAtividade'] ?? null;
+
+            if (is_numeric($ultimaAtividade)
+                && $agora - (int) $ultimaAtividade >= self::TEMPO_INATIVIDADE
+            ) {
+                $_SESSION = [];
+                session_regenerate_id(true);
+                $_SESSION['mensagemFlash'] = [
+                    'texto' => 'Sua sessão expirou por inatividade. Faça login novamente.',
+                    'tipo' => 'erro'
+                ];
+            } else {
+                $_SESSION['ultimaAtividade'] = $agora;
+            }
         }
 
         if (empty($_SESSION['csrf_token'])) {

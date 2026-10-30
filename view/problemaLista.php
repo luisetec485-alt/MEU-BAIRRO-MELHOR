@@ -442,7 +442,7 @@ $pageTitle = ($usuarioEhAdmin ? 'Denúncias registradas' : 'Minhas denúncias') 
             <!-- VOLTAR -->
 
             <a
-                href="../view/dashboard.php"
+                href="../controller/routes.php?acao=dashboard"
                 class="btn-secondary btn-block"
             >
                 Voltar ao Dashboard

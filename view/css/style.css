@@ -1178,6 +1178,22 @@ h1, h2, h3, h4 {
     margin-bottom: 7px;
 }
 
+.cadastro-politica label {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    font-weight: 400;
+}
+
+.cadastro-politica input[type="checkbox"] {
+    width: 18px;
+    min-width: 18px;
+    min-height: 18px;
+    height: 18px;
+    margin: 2px 0 0;
+    padding: 0;
+}
+
 .form-group input,
 .form-group textarea,
 .form-group select {

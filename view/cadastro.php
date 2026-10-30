@@ -21,23 +21,30 @@ include __DIR__ . '/header.php';
                 
                 <div class="form-group">
                     <label for="nome">Nome:</label>
-                    <input type="text" id="nome" name="nome" autocomplete="name" required
+                    <input type="text" id="nome" name="nome" autocomplete="name" maxlength="50" required
                            oninvalid="this.setCustomValidity('Dado Requerido')"
                            oninput="this.setCustomValidity('')">
                 </div>
 
                 <div class="form-group">
                     <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" autocomplete="email" required
+                    <input type="email" id="email" name="email" autocomplete="email" maxlength="100" required
                            oninvalid="this.setCustomValidity('Dado Requerido')"
                            oninput="this.setCustomValidity('')">
                 </div>
 
                 <div class="form-group">
                     <label for="senha">Senha:</label>
-                    <input type="password" id="senha" name="senha" autocomplete="new-password" required
+                    <input type="password" id="senha" name="senha" autocomplete="new-password" maxlength="255" required
                            oninvalid="this.setCustomValidity('Dado Requerido')"
                            oninput="this.setCustomValidity('')">
+                </div>
+
+                <div class="form-group cadastro-politica">
+                    <label>
+                        <input type="checkbox" name="aceitaPolitica" value="1" required>
+                        <span>Li e aceito a <a href="politicaPrivacidade.php" target="_blank" rel="noopener noreferrer">Política de Privacidade</a>.</span>
+                    </label>
                 </div>
 
                 <button type="submit" class="btn-green btn-block">Cadastrar</button>

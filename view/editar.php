@@ -24,17 +24,17 @@ include __DIR__ . '/header.php';
 
                 <div class="form-group">
                     <label for="nome">Nome:</label>
-                    <input type="text" id="nome" name="nome" value="<?php echo htmlspecialchars($usuario['nomeUsuario']); ?>" required>
+                    <input type="text" id="nome" name="nome" value="<?php echo htmlspecialchars($usuario['nomeUsuario']); ?>" maxlength="50" required>
                 </div>
 
                 <div class="form-group">
                     <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($usuario['Email']); ?>" required>
+                    <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($usuario['Email']); ?>" maxlength="100" required>
                 </div>
 
                 <div class="form-group">
                     <label for="senha">Nova Senha:</label>
-                    <input type="password" id="senha" name="senha" placeholder="Deixe em branco para manter">
+                    <input type="password" id="senha" name="senha" placeholder="Deixe em branco para manter" maxlength="255">
                 </div>
 
                 <button type="submit" class="btn-green btn-block">Salvar Alterações</button>
@@ -49,7 +49,7 @@ include __DIR__ . '/header.php';
                 </form>
             </div>
 
-            <a href="../view/dashboard.php" class="btn-secondary btn-block">Voltar ao Dashboard</a>
+            <a href="../controller/routes.php?acao=dashboard" class="btn-secondary btn-block">Voltar ao Dashboard</a>
         </div>
     </div>
 </section>

@@ -33,7 +33,7 @@ include __DIR__ . '/header.php';
                     Cadastrar Categoria
                 </button>
 
-                <a href="../view/dashboard.php" class="btn-secondary btn-block">
+                <a href="../controller/routes.php?acao=dashboard" class="btn-secondary btn-block">
                     Voltar
                 </a>
 

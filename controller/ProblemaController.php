@@ -54,8 +54,8 @@ class ProblemaController {
         $categoriaModel = new CategoriaModel();
         $subcategoriaModel = new SubcategoriaModel();
 
-        $categorias = $categoriaModel->listarTodos();
-        $subcategorias = $subcategoriaModel->listarTodos();
+        $categorias = $categoriaModel->listarComDenuncias($usuarioFiltro);
+        $subcategorias = $subcategoriaModel->listarComDenuncias($usuarioFiltro);
 
         require_once __DIR__.'/../view/problemaLista.php';
     }

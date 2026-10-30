@@ -5,6 +5,11 @@ require_once '../model/MensagemFlash.php';
 
 class CategoriaController {
 
+    public function listarParaMenu() {
+        $model = new CategoriaModel();
+        return $model->listarComSubcategorias();
+    }
+
     public function abrirFormulario() {
         require_once '../view/categoriaForm.php';
     }
@@ -51,7 +56,7 @@ class CategoriaController {
 
         $model = new CategoriaModel();
 
-        $categorias = $model->listarTodos();
+        $categorias = $model->listarComSubcategorias();
 
         require_once '../view/categoriaLista.php';
     }

@@ -15,7 +15,7 @@ include __DIR__ . '/header.php';
         <div class="welcome-box">
 
             <h2>Categorias</h2>
-            <p>Categorias cadastradas no sistema.</p>
+            <p>Categorias com subcategorias cadastradas.</p>
 
             <div class="table-responsive">
                 <table class="tabela-dados">

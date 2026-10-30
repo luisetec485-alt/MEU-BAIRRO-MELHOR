@@ -13,6 +13,7 @@ $nomeUsuario = trim((string) ($_SESSION['nomeUsuario'] ?? 'Usuário'));
 $primeiroNome = explode(' ', $nomeUsuario)[0] ?: 'Usuário';
 $usuarioAutenticado = isset($_SESSION['id']);
 $ehAdministrador = (int) ($_SESSION['nivelAcesso'] ?? 1) === 0;
+$categoriasComConteudo = $GLOBALS['categoriasComConteudo'] ?? [];
 $bodyClass = $bodyClass ?? '';
 $mensagemFlash = MensagemFlash::consumir();
 ?>
@@ -45,13 +46,15 @@ $mensagemFlash = MensagemFlash::consumir();
             <?php if ($ehAdministrador): ?>
                 <a href="<?= $routeBase ?>painelAdmin">Painel administrativo</a>
                 <a href="<?= $routeBase ?>relatorioUsuarios">Usuários</a>
-                <details class="site-nav-dropdown">
-                    <summary>Cadastros</summary>
-                    <div class="site-nav-dropdown-menu">
-                        <a href="<?= $routeBase ?>listarCategorias">Categorias</a>
-                        <a href="<?= $routeBase ?>listarSubcategorias">Subcategorias</a>
-                    </div>
-                </details>
+                <?php if ($categoriasComConteudo): ?>
+                    <details class="site-nav-dropdown">
+                        <summary>Cadastros</summary>
+                        <div class="site-nav-dropdown-menu">
+                            <a href="<?= $routeBase ?>listarCategorias">Categorias</a>
+                            <a href="<?= $routeBase ?>listarSubcategorias">Subcategorias</a>
+                        </div>
+                    </details>
+                <?php endif; ?>
             <?php endif; ?>
 
             <details class="profile-menu">

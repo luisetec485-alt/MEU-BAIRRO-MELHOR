@@ -10,6 +10,14 @@ class UsuarioController {
         $email = strtolower(trim((string) ($_POST['email'] ?? '')));
         $senha = (string) ($_POST['senha'] ?? '');
 
+        if (($_POST['aceitaPolitica'] ?? '') !== '1') {
+            MensagemFlash::redirecionar(
+                '../view/cadastro.php',
+                'Leia e aceite a Política de Privacidade para criar sua conta.',
+                'erro'
+            );
+        }
+
         // 4.1 - campos obrigatórios conferidos também no servidor, um de cada vez,
         // para a mensagem dizer exatamente o que falta.
         if ($nome === '') {
@@ -72,6 +80,18 @@ class UsuarioController {
             MensagemFlash::redirecionar('../view/login.php', 'Informe seu e-mail e sua senha.', 'erro');
         }
 
+        $model = new UsuarioModel();
+        $ip = (string) ($_SERVER['REMOTE_ADDR'] ?? '');
+        $bloqueadoAte = $model->obterBloqueioLogin($email, $ip);
+        if ($bloqueadoAte !== null) {
+            MensagemFlash::redirecionar(
+                '../view/login.php',
+                'Login bloqueado temporariamente após tentativas incorretas. Tente novamente após ' .
+                    date('H:i', strtotime($bloqueadoAte)) . '.',
+                'erro'
+            );
+        }
+
         $conexao = Conexao::getConexao();
 
         $stmt = $conexao->prepare("SELECT * FROM login WHERE Email = ?");
@@ -80,6 +100,7 @@ class UsuarioController {
         $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($resultado && password_verify($senha, $resultado['Senha'])) {
+            $model->limparTentativasLogin($email, $ip);
             
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
@@ -91,7 +112,16 @@ class UsuarioController {
             $_SESSION['nomeUsuario'] = $resultado['nomeUsuario'];
             $_SESSION['nivelAcesso'] = (int) $resultado['nivelAcesso'];
 
-            MensagemFlash::redirecionar('../view/dashboard.php', 'Login realizado com sucesso.');
+            MensagemFlash::redirecionar('routes.php?acao=dashboard', 'Login realizado com sucesso.');
+        }
+
+        $bloqueadoAte = $model->registrarFalhaLogin($email, $ip);
+        if ($bloqueadoAte !== null) {
+            MensagemFlash::redirecionar(
+                '../view/login.php',
+                'Login bloqueado por 15 minutos após 5 tentativas incorretas.',
+                'erro'
+            );
         }
 
         MensagemFlash::redirecionar('../view/login.php', 'E-mail ou senha incorretos', 'erro');
@@ -179,7 +209,7 @@ class UsuarioController {
         }
         
         $_SESSION['nomeUsuario'] = $nome;
-        MensagemFlash::redirecionar('../view/dashboard.php', 'Dados do perfil atualizados com sucesso.');
+        MensagemFlash::redirecionar('routes.php?acao=dashboard', 'Dados do perfil atualizados com sucesso.');
     }
 
     public function excluir() {

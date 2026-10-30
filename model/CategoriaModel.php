@@ -31,6 +31,39 @@ class CategoriaModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function listarComSubcategorias() {
+        $conexao = Conexao::getConexao();
+        $stmt = $conexao->prepare(
+            "SELECT DISTINCT c.*
+             FROM categorias c
+             INNER JOIN subcategorias s
+                ON s.categoriaid = c.id
+             ORDER BY c.nome ASC"
+        );
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function listarComDenuncias($usuarioId = null) {
+        $conexao = Conexao::getConexao();
+        $sql = "SELECT DISTINCT c.*
+                FROM categorias c
+                INNER JOIN problemas p
+                    ON p.categoriaid = c.id";
+        $parametros = [];
+
+        if ($usuarioId !== null) {
+            $sql .= ' WHERE p.usuarioid = ?';
+            $parametros[] = (int) $usuarioId;
+        }
+
+        $sql .= ' ORDER BY c.nome ASC';
+        $stmt = $conexao->prepare($sql);
+        $stmt->execute($parametros);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function buscarPorId($id) {
         $conexao = Conexao::getConexao();
         $stmt = $conexao->prepare(

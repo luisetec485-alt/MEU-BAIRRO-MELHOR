@@ -82,6 +82,9 @@ $categoriaController = new CategoriaController();
 $subcategoriaController = new SubcategoriaController();
 $problemaController = new ProblemaController();
 $recuperacaoSenhaController = new RecuperacaoSenhaController();
+$GLOBALS['categoriasComConteudo'] = Seguranca::ehAdministrador()
+    ? $categoriaController->listarParaMenu()
+    : [];
 
 switch ($acao) {
 

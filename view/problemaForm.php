@@ -64,6 +64,7 @@ include __DIR__ . '/header.php';
                         name="descricao"
                         rows="4"
                         required
+                        maxlength="5000"
                         placeholder="Descreva os detalhes do problema encontrado..."
                     ></textarea>
 
@@ -302,7 +303,7 @@ include __DIR__ . '/header.php';
                 </button>
 
                 <a
-                    href="../view/dashboard.php"
+                    href="../controller/routes.php?acao=dashboard"
                     class="btn-secondary btn-block"
                 >
                     Voltar ao Dashboard

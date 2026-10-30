@@ -35,6 +35,7 @@ include __DIR__ . '/header.php';
                         id="email"
                         name="email"
                         autocomplete="email"
+                        maxlength="100"
                         required
                     >
 

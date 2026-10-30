@@ -3,7 +3,7 @@ require_once __DIR__ . '/../model/Seguranca.php';
 Seguranca::iniciarSessao();
 
 if (isset($_SESSION['id'])) {
-    header('Location: ../view/dashboard.php');
+    header('Location: ../controller/routes.php?acao=dashboard');
     exit;
 }
 
@@ -18,8 +18,9 @@ include __DIR__ . '/header.php';
             <span class="landing-eyebrow">Cuidar do bairro é construir o futuro</span>
             <h1>Uma cidade melhor começa com a sua participação.</h1>
             <p>
-                O Meu Bairro Melhor ajuda você a registrar problemas urbanos
-                com clareza e facilita o encaminhamento manual para os setores responsáveis.
+                O Meu Bairro Melhor é uma plataforma para moradores de Franco da Rocha
+                registrarem problemas urbanos e para administradores organizarem e
+                encaminharem esses relatos aos setores responsáveis.
             </p>
             <div class="landing-actions">
                 <a class="btn-green" href="cadastro.php">Criar minha conta</a>
@@ -39,9 +40,9 @@ include __DIR__ . '/header.php';
 
     <section class="landing-section">
         <div class="landing-section-heading">
-            <span class="landing-eyebrow">Como funciona</span>
-            <h2>Um ciclo simples, transparente e colaborativo</h2>
-            <p>Você registra. Nós organizamos as informações. O administrador faz o encaminhamento manual.</p>
+            <span class="landing-eyebrow">Como usar</span>
+            <h2>Do registro ao encaminhamento</h2>
+            <p>Moradores registram o problema com localização e detalhes; administradores analisam o relato e fazem o encaminhamento manual.</p>
         </div>
 
         <div class="landing-steps">
