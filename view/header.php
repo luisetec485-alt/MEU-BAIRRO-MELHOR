@@ -80,8 +80,10 @@ $mensagemFlash = MensagemFlash::consumir();
 </header>
 <?php if ($mensagemFlash): ?>
     <div class="flash-message flash-message-<?= htmlspecialchars($mensagemFlash['tipo'], ENT_QUOTES, 'UTF-8') ?>"
+         data-duration="<?= $mensagemFlash['tipo'] === 'erro' ? '10000' : '6000' ?>"
          role="<?= $mensagemFlash['tipo'] === 'erro' ? 'alert' : 'status' ?>"
          aria-live="<?= $mensagemFlash['tipo'] === 'erro' ? 'assertive' : 'polite' ?>">
         <?= htmlspecialchars($mensagemFlash['texto'], ENT_QUOTES, 'UTF-8') ?>
+        <button class="flash-message-dismiss" type="button" aria-label="Fechar notificação">Fechar</button>
     </div>
 <?php endif; ?>

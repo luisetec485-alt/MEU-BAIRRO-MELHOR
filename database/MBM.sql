@@ -264,34 +264,6 @@ WHERE NOT EXISTS (
       AND s.categoriaid = c.id
 );
 
-INSERT INTO login (nomeUsuario, Senha, Email, nivelAcesso)
-SELECT
-    'Administrador Teste',
-    '$2y$10$OSvh8GBDx35/0.DnbGlpNeJ9sA1d9EiF.pxOzqaoEpfMVP4adX0a6',
-    'admin@meubairro.com',
-    0
-FROM DUAL
-WHERE NOT EXISTS (
-    SELECT 1 FROM login WHERE Email = 'admin@meubairro.com'
-);
- 
-INSERT INTO login (nomeUsuario, Senha, Email, nivelAcesso)
-SELECT
-    'Leitor Teste',
-    '$2y$10$bLePFO5Xtz2ooCqV8nJzRe/8/yStrJTlG.OTrfj96aHQJLL.DN3XC',
-    'leitor@meubairro.com',
-    1
-FROM DUAL
-WHERE NOT EXISTS (
-    SELECT 1 FROM login WHERE Email = 'leitor@meubairro.com'
-);
- 
--- Conferir:
-SELECT idUsuario, nomeUsuario, Email,
-       CASE nivelAcesso WHEN 0 THEN 'Administrador' ELSE 'Usuário comum' END AS perfil
-FROM login
-WHERE Email IN ('admin@meubairro.com', 'leitor@meubairro.com');
-
 -- CONSULTAS ÚTEIS PARA TESTES
 
 -- Consultar usuários
